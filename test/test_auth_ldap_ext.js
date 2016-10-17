@@ -164,8 +164,24 @@ exports.hook_capabilities = {
 };
 
 exports.register = {
-    setUp : _set_up
-    // TODO
+    setUp : _set_up,
+    'set master and child hooks to gain pool access' : function(test) {
+        test.expect(5);
+        test.equals(false, this.plugin.register_hook.called);
+        this.plugin.register();
+        test.equals('init_master', this.plugin.register_hook.args[0][0]);
+        test.equals('init_child', this.plugin.register_hook.args[1][0]);
+        test.equals('init_auth_ldap_ext', this.plugin.register_hook.args[0][1]);
+        test.equals('init_auth_ldap_ext', this.plugin.register_hook.args[1][1]);
+        test.done();
+    },
+    'load configuration file' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        this.plugin.register();
+        test.equals('sub', plugin.cfg.main.scope);
+        test.done();
+    }
 };
 
 exports.check_plain_passwd = {
