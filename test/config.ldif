@@ -1,0 +1,63 @@
+# disallow anonymous binds
+dn: cn=config
+changetype: modify
+add: olcDisallows
+olcDisallows: bind_anon
+
+dn: olcDatabase={-1}frontend,cn=config
+changetype: modify
+add: olcRequires
+olcRequires: authc
+
+# set root password to: rAR84,NZ=F
+dn: olcDatabase={2}mdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}bPf32h0ItVUKLlVzsR6od+Ub5GDZRBIr
+
+# enable tls
+dn: cn=config
+changetype: modify
+replace: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/openldap/certs/slapdcert.pem
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/certs/slapdkey.pem
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/certs/slapdcert.pem
+
+# enable openldap memberof overlay
+dn: cn=module,cn=config
+changetype: add
+cn: module
+objectclass: olcModuleList
+objectclass: top
+olcmoduleload: memberof.la
+olcmodulepath: /usr/lib64/openldap
+
+dn: olcOverlay={0}memberof,olcDatabase={2}mdb,cn=config
+changetype: add
+objectClass: olcConfig
+objectClass: olcMemberOf
+objectClass: olcOverlayConfig
+objectClass: top
+olcOverlay: memberof
+
+dn: cn=module,cn=config
+changetype: add
+cn: module
+objectclass: olcModuleList
+objectclass: top
+olcmoduleload: refint.la
+olcmodulepath: /usr/lib64/openldap
+
+dn: olcOverlay={1}refint,olcDatabase={2}mdb,cn=config
+changetype: add
+objectClass: olcConfig
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+objectClass: top
+olcOverlay: {1}refint
+olcRefintAttribute: memberof member owner
+

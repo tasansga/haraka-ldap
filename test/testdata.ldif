@@ -1,0 +1,88 @@
+# add base dn
+dn: dc=my-domain,dc=com
+changetype: add
+objectclass: top
+objectclass: organization
+objectClass: dcObject
+dc: my-domain
+o: my-domain.com
+
+# add 2 dn for people
+dn: ou=users,dc=my-domain,dc=com
+changetype: add
+objectclass: top
+objectclass: organizationalUnit
+ou: users
+
+dn: ou=people,dc=my-domain,dc=com
+changetype: add
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+# add user1 in 1st dn
+# password is: ykaHsOzEZD
+dn: uid=user1,ou=users,dc=my-domain,dc=com
+changetype: add
+objectClass: top
+objectClass: uidObject
+objectClass: device
+objectClass: simpleSecurityObject
+objectClass: inetLocalMailRecipient
+uid: user1
+cn: Test User 1
+mailLocalAddress: user1@my-domain.com
+userPassword: {SSHA}ul8jaq76hmLRuvheYxSqPDCQrPxldRkl
+
+# add user2 in 2nd dn
+# password is: KQD9zs,LGv
+dn: uid=user2,ou=people,dc=my-domain,dc=com
+changetype: add
+objectClass: top
+objectClass: uidObject
+objectClass: device
+objectClass: simpleSecurityObject
+objectClass: inetLocalMailRecipient
+uid: user2
+cn: Test User 2
+mailLocalAddress: user2@my-domain.com
+userPassword: {SSHA}j999dNJUvKzt480ky0/A5VvNRqzSS1TA
+
+# add nonuniqe in both dn
+# password is: CZVm3,BLlx
+dn: uid=nonunique,ou=users,dc=my-domain,dc=com
+changetype: add
+objectClass: top
+objectClass: uidObject
+objectClass: device
+objectClass: simpleSecurityObject
+objectClass: inetLocalMailRecipient
+uid: nonunique
+cn: Nonunique Test User 1
+mailLocalAddress: nonunique1@my-domain.com
+userPassword: {SSHA}/zz+SrbdIhlwQ6ypFP2bupP6IUKzgA2z
+
+# password is: LsBHDGorAh
+dn: uid=nonunique,ou=people,dc=my-domain,dc=com
+changetype: add
+objectClass: top
+objectClass: uidObject
+objectClass: device
+objectClass: simpleSecurityObject
+objectClass: inetLocalMailRecipient
+uid: nonunique
+cn: Nonunique Test User 2
+mailLocalAddress: nonunique2@my-domain.com
+userPassword: {SSHA}gLTxl9QpE1dHNgfZK9d3Ne8MKXtFRRfn
+
+# add group
+dn: cn=postmaster,dc=my-domain,dc=com
+changetype: add
+objectclass: top
+objectclass: groupOfNames
+objectClass: inetLocalMailRecipient
+mailLocalAddress: postmaster@my-domain.com
+member: uid=user1,ou=users,dc=my-domain,dc=com
+member: uid=user2,ou=users,dc=my-domain,dc=com
+member: uid=nonuniqe,ou=users,dc=my-domain,dc=com
+
