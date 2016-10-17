@@ -82,11 +82,11 @@ exports.verify_user = {
     }
 };
 
-exports.get_opts = {
+exports._get_search_conf = {
     setUp : _set_up,
     'get defaults' : function(test) {
         test.expect(3);
-        var opts = this.plugin._get_config('testUid');
+        var opts = this.plugin._get_search_conf('testUid');
         test.equals(opts.filter, '(&(objectclass=*)(uid=testUid))');
         test.equals(opts.scope, 'sub');
         test.equals(opts.attributes.toString(), ['dn', 'mail'].toString());
@@ -97,7 +97,7 @@ exports.get_opts = {
         this.plugin.cfg.scope = 'single';
         this.plugin.cfg.mail_attribute = 'mailLocalAddress';
         test.expect(3);
-        var opts = this.plugin._get_config('testUid');
+        var opts = this.plugin._get_search_conf('testUid');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid))');
         test.equals(opts.scope, 'single');
         test.equals(opts.attributes.toString(), ['dn', 'mailLocalAddress'].toString());

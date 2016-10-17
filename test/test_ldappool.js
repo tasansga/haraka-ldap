@@ -2,7 +2,6 @@
 
 var fixtures     = require('haraka-test-fixtures');
 
-
 // test user data as defined in testdata.ldif
 var users = [
     {
