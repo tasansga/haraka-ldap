@@ -151,10 +151,11 @@ exports.hook_capabilities = {
     },
     'tls ante portas, ready for auth login' : function(test) {
         var cb = function (rc, msg) {
-            test.expect(3);
-            test.ok(this.connection.notes.allowed_auth_methods.length === 1);
-            test.ok(this.connection.notes.allowed_auth_methods[0] === 'LOGIN');
-            test.ok(this.connection.capabilities[0] === 'AUTH LOGIN');
+            test.expect(4);
+            test.ok(this.connection.notes.allowed_auth_methods.length === 2);
+            test.ok(this.connection.notes.allowed_auth_methods[0] === 'PLAIN');
+            test.ok(this.connection.notes.allowed_auth_methods[1] === 'LOGIN');
+            test.ok(this.connection.capabilities[0] === 'AUTH PLAIN LOGIN');
             test.done();
         }.bind(this);
         this.connection.using_tls = true;
