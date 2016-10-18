@@ -1,7 +1,7 @@
 'use strict';
 
 var fixtures     = require('haraka-test-fixtures');
-var ldappool     = require('../plugins/ldappool.js');
+var ldappool     = require('../../../plugins/ldappool.js');
 
 // test user data as defined in testdata.ldif
 var users = [
