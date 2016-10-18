@@ -73,8 +73,8 @@ exports._get_dn_for_uid = function (uid, callback) {
 exports.hook_capabilities = function (next, connection) {
     // Don't offer AUTH capabilities by default unless session is encrypted
     if (connection.using_tls) {
-        var methods = [ 'LOGIN' ];
-        connection.capabilities.push('AUTH LOGIN');
+        var methods = [ 'PLAIN', 'LOGIN' ];
+        connection.capabilities.push('AUTH ' + methods.join(' '));
         connection.notes.allowed_auth_methods = methods;
     }
     next();
