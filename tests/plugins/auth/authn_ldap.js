@@ -79,6 +79,11 @@ exports.verify_user = {
             test.equals(false, ok);
             test.done();
         });
+    },
+    'no pool' : function(test) {
+        test.expect(0);
+        // TODO
+        test.done();
     }
 };
 
@@ -156,6 +161,11 @@ exports.get_dn_for_uid = {
             test.equals(undefined, userdn);
             test.done();
         });
+    },
+    'no pool' : function(test) {
+        test.expect(0);
+        // TODO
+        test.done();
     }
 };
 
@@ -219,6 +229,11 @@ exports.init_authn_ldap = {
             test.done();
         };
         plugin.init_authn_ldap(callback, { notes : { ldappool : {} } });
+    },
+    'no pool' : function(test) {
+        test.expect(0);
+        // TODO
+        test.done();
     }
 };
 
