@@ -9,32 +9,35 @@
 
 exports._verify_address = function (uid, address, callback) {
     var plugin = this;
-    if (!this.pool) {
-        plugin.logerror('Could not verify uid and address: LDAP Pool not found!')
-        callback('LDAP Pool not found!');
-    }
-    var plugin = this;
     var onError = function(err) {
         plugin.logerror('Could not verify address "' + address + '"  for UID "' + uid + '": ' +  err);
-        callback(err);
+        callback(err, false);
     };
+    if (!this.pool) {
+        return onError('LDAP Pool not found!');
+    }
     var dnSearch = function (err, client) {
-        var config = plugin._get_search_conf(uid, address);
         if (err) {
-            onError(err);
+            return onError(err);
         }
         else {
-            client.search(config.basedn, config, function(search_error, res) {
-                if (search_error) { onError(search_error); }
-                var entries = 0;
-                res.on('searchEntry', function(entry) {
-                    entries++;
+            var config = plugin._get_search_conf(uid, address);
+            try {
+                client.search(config.basedn, config, function(search_error, res) {
+                    if (search_error) { onError(search_error); }
+                    var entries = 0;
+                    res.on('searchEntry', function(entry) {
+                        entries++;
+                    });
+                    res.on('error', onError);
+                    res.on('end', function() {
+                        callback(null, entries > 0);
+                    });
                 });
-                res.on('error', onError);
-                res.on('end', function() {
-                    callback(null, entries > 0);
-                });
-            });
+            }
+            catch (e) {
+                return onError(e);
+            }
         }
     };
     this.pool.get(dnSearch);
@@ -70,6 +73,7 @@ exports.register = function() {
 };
 
 exports.init_authz_ldap = function(next, server) {
+    var plugin = this;
     if (!server.notes.ldappool) {
         plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
     }

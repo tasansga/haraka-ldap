@@ -57,11 +57,11 @@ exports._get_dn_for_uid = function (uid, callback) {
         return onError('LDAP Pool not found!');
     }
     var dnSearch = function (err, client) {
-        var config = plugin._get_search_conf(uid);
         if (err) {
             return onError(err);
         }
         else {
+            var config = plugin._get_search_conf(uid);
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }

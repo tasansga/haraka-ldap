@@ -34,7 +34,7 @@ var _set_up =
         function (done) {
     this.users = users;
     this.plugin = new fixtures.plugin('auth/authz_ldap');
-    this.plugin.cfg = {};
+    this.plugin.cfg = { main : { } };
     this.connection = fixtures.connection.createConnection();
     this.plugin.init_authz_ldap(function(){}, {
         notes : {
@@ -45,35 +45,59 @@ var _set_up =
             })
         }
     });
+    this.plugin.cfg.main.filter =  '(&(objectclass=*)(uid=%u)(mailLocalAddress=%a))';
     done();
 };
 
 exports._verify_address = {
     setUp : _set_up,
     '1 entry' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(1);
+        var plugin = this.plugin;
+        var user = this.users[0];
+        plugin._verify_address(user.uid, user.mail, function(err, result) {
+            test.equals(true, result);
+            test.done();
+        });
     },
     '0 entries' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(1);
+        var plugin = this.plugin;
+        plugin._verify_address('alien', 'unknown', function(err, result) {
+            test.equals(false, result);
+            test.done();
+        });
     },
     '2 entries' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(1);
+        var plugin = this.plugin;
+        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u)(uid=user2)))';
+        plugin._verify_address('user1', 'who cares', function(err, result) {
+            test.equals(true, result);
+            test.done();
+        });
     },
     'invalid search filter' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(2);
+        var plugin = this.plugin;
+        var user = this.users[0];
+        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
+        plugin._verify_address(user.uid, user.mail, function(err, result) {
+            test.equals('Error: (|(uid=user has unbalanced parentheses', err.toString());
+            test.equals(false, result);
+            test.done();
+        });
     },
     'no pool' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(2);
+        var plugin = this.plugin;
+        plugin.pool = undefined;
+        var user = this.users[0];
+        plugin._verify_address(user.uid, user.mail, function (err, userdn) {
+            test.equals('LDAP Pool not found!', err);
+            test.equals(false, userdn);
+            test.done();
+        });
     }
 };
 
