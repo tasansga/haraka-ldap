@@ -103,9 +103,8 @@ exports.init_authn_ldap = function(next, server) {
     if (!server.notes.ldappool) {
         throw new Error('LDAP Pool not found! Make sure ldappool plugin is loaded first!');
     }
-    else {
-        this.pool = server.notes.ldappool;
-    }
+    this.pool = server.notes.ldappool;
+    next();
 };
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
