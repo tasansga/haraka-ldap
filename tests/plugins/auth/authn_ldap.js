@@ -178,9 +178,11 @@ exports.register = {
     },
     'load configuration file' : function(test) {
         var plugin = this.plugin;
-        test.expect(1);
+        test.expect(3);
         this.plugin.register();
         test.equals('sub', plugin.cfg.main.scope);
+        test.equals('mailLocalAddress', plugin.cfg.main.mail_attribute);
+        test.equals('(&(objectclass=*)(uid=%u))', plugin.cfg.main.searchfilter);
         test.done();
     }
 };
