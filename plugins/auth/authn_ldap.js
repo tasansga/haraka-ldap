@@ -32,13 +32,13 @@ exports._verify_user = function (userdn, passwd, cb) {
 
 exports._get_search_conf = function(user) {
     var plugin = this;
-    var filter = plugin.cfg.filter || '(&(objectclass=*)(uid=%u))';
+    var filter = plugin.cfg.main.filter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
     var config = {
         basedn: this.pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.scope || 'sub',
-        attributes: ['dn', plugin.cfg.mail_attribute || 'mail']
+        scope: plugin.cfg.main.scope || 'sub',
+        attributes: ['dn', plugin.cfg.main.mail_attribute || 'mail']
     };
     if (config.basedn === undefined) {
         plugin.logerror("Undefined basedn. Please check your configuration!");
