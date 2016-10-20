@@ -134,6 +134,16 @@ exports.get_dn_for_uid = {
             test.equals(0, userdn.length);
             test.done();
         });
+    },
+    'invalid search filter' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var user = this.users[0];
+        plugin.cfg.main.filter = '(&(objectclass=*)(uid=%u';
+        plugin._get_dn_for_uid(user.uid, function (err, userdn) {
+            test.equals('Error: (uid=user has unbalanced parentheses', err.toString());
+            test.done();
+        });
     }
 };
 

@@ -61,17 +61,22 @@ exports._get_dn_for_uid = function (uid, callback) {
             onError(err);
         }
         else {
-            client.search(config.basedn, config, function(search_error, res) {
-                if (search_error) { onError(search_error); }
-                var userdn=[];
-                res.on('searchEntry', function(entry) {
-                    userdn.push(entry.object.dn);
+            try {
+                client.search(config.basedn, config, function(search_error, res) {
+                    if (search_error) { onError(search_error); }
+                    var userdn=[];
+                    res.on('searchEntry', function(entry) {
+                        userdn.push(entry.object.dn);
+                    });
+                    res.on('error', onError);
+                    res.on('end', function() {
+                        callback(null, userdn);
+                    });
                 });
-                res.on('error', onError);
-                res.on('end', function() {
-                    callback(null, userdn);
-                });
-            });
+            }
+            catch (e) {
+                onError(e);
+            }
         }
     };
     this.pool.get(dnSearch);
