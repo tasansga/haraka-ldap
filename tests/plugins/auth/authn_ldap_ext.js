@@ -33,7 +33,7 @@ var users = [
 
 var _set_up = function (done) {
     this.users = users;
-    this.plugin = new fixtures.plugin('auth/authn_ldap_ext');
+    this.plugin = new fixtures.plugin('auth/authn_ldap');
     this.plugin.cfg = {};
     this.connection = fixtures.connection.createConnection();
     this.plugin.init_auth_ldap_ext(undefined, {
