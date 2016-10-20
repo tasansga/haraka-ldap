@@ -151,9 +151,14 @@ exports.init_authz_ldap = {
         plugin.init_authz_ldap(callback, { notes : { ldappool : {} } });
     },
     'no pool' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        var plugin = this.plugin;
+        test.expect(1);
+        plugin.pool = undefined;
+        var callback = function() {
+            test.equals(undefined, plugin.pool);
+            test.done();
+        };
+        plugin.init_authz_ldap(callback, { notes : { } });
     }
 };
 
