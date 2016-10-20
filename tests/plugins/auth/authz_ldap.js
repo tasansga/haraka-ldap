@@ -36,7 +36,7 @@ var _set_up =
     this.plugin = new fixtures.plugin('auth/authz_ldap');
     this.plugin.cfg = {};
     this.connection = fixtures.connection.createConnection();
-    this.plugin.init_auth_ldap_ext(undefined, {
+    this.plugin.init_authz_ldap(undefined, {
         notes : {
             ldappool : new ldappool.LdapPool({
                 binddn : this.users[0].dn,

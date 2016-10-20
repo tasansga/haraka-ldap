@@ -36,7 +36,7 @@ var _set_up = function (done) {
     this.plugin = new fixtures.plugin('auth/authn_ldap');
     this.plugin.cfg = {};
     this.connection = fixtures.connection.createConnection();
-    this.plugin.init_auth_ldap_ext(undefined, {
+    this.plugin.init_authn_ldap(undefined, {
         notes : {
             ldappool : new ldappool.LdapPool({
                 binddn : this.users[0].dn,
@@ -172,8 +172,8 @@ exports.register = {
         this.plugin.register();
         test.equals('init_master', this.plugin.register_hook.args[0][0]);
         test.equals('init_child', this.plugin.register_hook.args[1][0]);
-        test.equals('init_auth_ldap_ext', this.plugin.register_hook.args[0][1]);
-        test.equals('init_auth_ldap_ext', this.plugin.register_hook.args[1][1]);
+        test.equals('init_authn_ldap', this.plugin.register_hook.args[0][1]);
+        test.equals('init_authn_ldap', this.plugin.register_hook.args[1][1]);
         test.done();
     },
     'load configuration file' : function(test) {
