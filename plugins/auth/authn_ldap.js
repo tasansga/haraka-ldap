@@ -10,7 +10,8 @@
 exports._verify_user = function (userdn, passwd, cb) {
     var plugin = this;
     if (!this.pool) {
-        throw new Error('LDAP Pool not found!');
+        plugin.logerror('Could not verify userdn and password: LDAP Pool not found!');
+        callback('LDAP Pool not found!');
     }
     this.pool._create_client(function (err, client) {
         if (err) {
@@ -47,14 +48,14 @@ exports._get_search_conf = function(user) {
 };
 
 exports._get_dn_for_uid = function (uid, callback) {
-    if (!this.pool) {
-        throw new Error('LDAP Pool not found!');
-    }
     var plugin = this;
     var onError = function(err) {
         plugin.logerror('Could not get DN for UID "' + uid + '": ' +  err);
         callback(err);
     };
+    if (!this.pool) {
+        onError('LDAP Pool not found!');
+    }
     var dnSearch = function (err, client) {
         var config = plugin._get_search_conf(uid);
         if (err) {
@@ -105,10 +106,13 @@ exports.register = function() {
 };
 
 exports.init_authn_ldap = function(next, server) {
+    var plugin = this;
     if (!server.notes.ldappool) {
-        throw new Error('LDAP Pool not found! Make sure ldappool plugin is loaded first!');
+        plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
     }
-    this.pool = server.notes.ldappool;
+    else {
+        this.pool = server.notes.ldappool;
+    }
     next();
 };
 
