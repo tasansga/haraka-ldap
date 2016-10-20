@@ -81,9 +81,14 @@ exports.verify_user = {
         });
     },
     'no pool' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(1);
+        var plugin = this.plugin;
+        plugin.pool = undefined;
+        var user = this.users[0];
+        plugin._verify_user(user.dn, user.password, function(result) {
+            test.equals(false, result)
+            test.done();
+        });
     }
 };
 
@@ -163,9 +168,15 @@ exports.get_dn_for_uid = {
         });
     },
     'no pool' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        test.expect(2);
+        var plugin = this.plugin;
+        plugin.pool = undefined;
+        var user = this.users[0];
+        plugin._get_dn_for_uid(user.uid, function (err, userdn) {
+            test.equals('LDAP Pool not found!', err);
+            test.equals(undefined, userdn);
+            test.done();
+        });
     }
 };
 
@@ -231,9 +242,14 @@ exports.init_authn_ldap = {
         plugin.init_authn_ldap(callback, { notes : { ldappool : {} } });
     },
     'no pool' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+        var plugin = this.plugin;
+        test.expect(1);
+        plugin.pool = undefined;
+        var callback = function() {
+            test.equals(undefined, plugin.pool);
+            test.done();
+        };
+        plugin.init_authn_ldap(callback, { notes : { } });
     }
 };
 

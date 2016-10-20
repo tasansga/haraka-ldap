@@ -11,7 +11,7 @@ exports._verify_user = function (userdn, passwd, cb) {
     var plugin = this;
     if (!this.pool) {
         plugin.logerror('Could not verify userdn and password: LDAP Pool not found!');
-        callback('LDAP Pool not found!');
+        return cb(false);
     }
     this.pool._create_client(function (err, client) {
         if (err) {
@@ -54,12 +54,12 @@ exports._get_dn_for_uid = function (uid, callback) {
         callback(err);
     };
     if (!this.pool) {
-        onError('LDAP Pool not found!');
+        return onError('LDAP Pool not found!');
     }
     var dnSearch = function (err, client) {
         var config = plugin._get_search_conf(uid);
         if (err) {
-            onError(err);
+            return onError(err);
         }
         else {
             try {
@@ -71,12 +71,12 @@ exports._get_dn_for_uid = function (uid, callback) {
                     });
                     res.on('error', onError);
                     res.on('end', function() {
-                        callback(null, userdn);
+                        return callback(null, userdn);
                     });
                 });
             }
             catch (e) {
-                onError(e);
+                return onError(e);
             }
         }
     };
