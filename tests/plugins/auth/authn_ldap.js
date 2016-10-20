@@ -34,7 +34,7 @@ var users = [
 var _set_up = function (done) {
     this.users = users;
     this.plugin = new fixtures.plugin('auth/authn_ldap');
-    this.plugin.cfg = {};
+    this.plugin.cfg = { main : {} };
     this.connection = fixtures.connection.createConnection();
     this.plugin.init_authn_ldap(undefined, {
         notes : {
@@ -93,9 +93,9 @@ exports._get_search_conf = {
         test.done();
     },
     'get userdef' : function(test) {
-        this.plugin.cfg.filter = '(&(objectclass=posixAccount)(uid=%u))';
-        this.plugin.cfg.scope = 'single';
-        this.plugin.cfg.mail_attribute = 'mailLocalAddress';
+        this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u))';
+        this.plugin.cfg.main.scope = 'single';
+        this.plugin.cfg.main.mail_attribute = 'mailLocalAddress';
         test.expect(3);
         var opts = this.plugin._get_search_conf('testUid');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid))');
