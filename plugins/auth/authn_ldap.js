@@ -71,7 +71,7 @@ exports._get_dn_for_uid = function (uid, callback) {
                     });
                     res.on('error', onError);
                     res.on('end', function() {
-                        return callback(null, userdn);
+                        callback(null, userdn);
                     });
                 });
             }
