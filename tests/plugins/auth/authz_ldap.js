@@ -159,19 +159,35 @@ exports.init_authz_ldap = {
 
 exports.check_authz = {
     setUp : _set_up,
-    'test denysoft' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+    'ok' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        var callback = function(err) {
+            test.equals(undefined, err);
+            test.done();
+        };
+        this.connection.notes = { auth_user : 'user1' };
+        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
     },
-    'test deny' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+    'deny if not authorized' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        var callback = function(err) {
+            test.equals(DENY, err);
+            test.done();
+        };
+        this.connection.notes = { auth_user : 'user1' };
+        plugin.check_authz(callback, this.connection, ['user2@my-domain.com']);
     },
-    'test ok' : function(test) {
-        test.expect(0);
-        // TODO
-        test.done();
+    'denysoft on error' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        var callback = function(err) {
+            test.equals(DENYSOFT, err);
+            test.done();
+        };
+        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
+        this.connection.notes = { auth_user : 'user1' };
+        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
     }
 };
