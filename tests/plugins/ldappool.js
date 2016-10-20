@@ -179,6 +179,17 @@ exports._bind_default = {
             test.done();
         };
         pool._bind_default(tests);
+    },
+    'bind with invalid binddn / bindpw' : function(test) {
+        test.expect(1);
+        this.cfg.binddn = 'invalid';
+        this.cfg.bindpw = 'invalid';
+        var pool = new this.plugin.LdapPool(this.cfg);
+        var tests = function(err, client) {
+            test.equals('InvalidDnSyntaxError: invalid DN', err);
+            test.done();
+        };
+        pool._bind_default(tests);
     }
 };
 
