@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * ldappool.js
+ * This haraka module implements pooling of bound LDAP connections to avoid
+ * the necessity to open and bind new connections for every request.
+ */
+
+
 var LdapPool = function(config) {
     this._set_config(config);
     this.pool = { '*' : { 'servers' : [] } };

@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * authn_ldap.js
+ * This haraka module implements authentication agains LDAP servers,
+ * i.e. it checks if the given user credentials are valid in LDAP.
+ */
+
+
 exports._verify_user = function (userdn, passwd, cb) {
     var plugin = this;
     if (!this.pool) {
@@ -83,16 +90,16 @@ exports.hook_capabilities = function (next, connection) {
 exports.register = function() {
     this.inherits('auth/auth_base');
     var plugin = this;
-    plugin.register_hook('init_master',  'init_auth_ldap_ext');
-    plugin.register_hook('init_child',   'init_auth_ldap_ext');
-    var load_auth_ldap_ext_ini = function() {
-        plugin.loginfo("loading auth_ext_ldap.ini");
-        plugin.cfg = plugin.config.get('auth_ldap_ext.ini', 'ini', load_auth_ldap_ext_ini);
+    plugin.register_hook('init_master',  'init_authn_ldap');
+    plugin.register_hook('init_child',   'init_authn_ldap');
+    var load_authn_ldap_ini = function() {
+        plugin.loginfo("loading authn_ldap.ini");
+        plugin.cfg = plugin.config.get('authn_ldap.ini', 'ini', load_authn_ldap_ini);
     };
-    load_auth_ldap_ext_ini();
+    load_authn_ldap_ini();
 };
 
-exports.init_auth_ldap_ext = function(next, server) {
+exports.init_authn_ldap = function(next, server) {
     if (!server.notes.ldappool) {
         throw new Error('LDAP Pool not found! Make sure ldappool plugin is loaded first!');
     }
@@ -119,7 +126,4 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
             plugin._verify_user(userdn[0], passwd, cb);
         }
     });
-    //var mfaddr = connection.transaction.mail_from.address().toString();
-    // TODO: filter should check user owns mail_from address!
-    //       connection.transaction.rcpt_to is an array for that
 };
