@@ -136,12 +136,24 @@ exports.get_dn_for_uid = {
         });
     },
     'invalid search filter' : function(test) {
-        test.expect(1);
+        test.expect(2);
         var plugin = this.plugin;
         var user = this.users[0];
         plugin.cfg.main.filter = '(&(objectclass=*)(uid=%u';
         plugin._get_dn_for_uid(user.uid, function (err, userdn) {
             test.equals('Error: (uid=user has unbalanced parentheses', err.toString());
+            test.equals(undefined, userdn);
+            test.done();
+        });
+    },
+    'invalid basedn' : function(test) {
+        test.expect(2);
+        var plugin = this.plugin;
+        var user = this.users[0];
+        plugin.pool.config.basedn = 'invalid';
+        plugin._get_dn_for_uid(user.uid, function (err, userdn) {
+            test.equals('InvalidDistinguishedNameError', err.name);
+            test.equals(undefined, userdn);
             test.done();
         });
     }
