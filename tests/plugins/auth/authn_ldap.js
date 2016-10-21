@@ -86,7 +86,7 @@ exports.verify_user = {
         plugin.pool = undefined;
         var user = this.users[0];
         plugin._verify_user(user.dn, user.password, function(result) {
-            test.equals(false, result)
+            test.equals(false, result);
             test.done();
         });
     }
