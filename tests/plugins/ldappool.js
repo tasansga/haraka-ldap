@@ -2,41 +2,17 @@
 
 var fixtures     = require('haraka-test-fixtures');
 
-// test user data as defined in testdata.ldif
-var users = [
-    {
+var _set_up = function (done) {
+    this.user = {
         uid : 'user1',
         dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
         password : 'ykaHsOzEZD',
         mail : 'user1@my-domain.com'
-    },
-    {
-        uid : 'user2',
-        dn : 'uid=user2,ou=people,dc=my-domain,dc=com',
-        password : 'KQD9zs,LGv',
-        mail : 'user2@my-domain.com'
-    },
-    {
-        uid : 'nonuniqe',
-        dn : 'uid=nonunique,ou=users,dc=my-domain,dc=com',
-        password : 'CZVm3,BLlx',
-        mail : 'nonuniqe1@my-domain.com'
-    },
-    {
-        uid : 'nonuniqe',
-        dn : 'uid=nonunique,ou=people,dc=my-domain,dc=com',
-        password : 'LsBHDGorAh',
-        mail : 'nonuniqe2@my-domain.com'
-    }
-];
-
-
-var _set_up = function (done) {
-    this.users = users;
+    };
     this.plugin = new fixtures.plugin('ldappool');
     this.cfg = {
-        binddn : this.users[0].dn,
-        bindpw : this.users[0].password,
+        binddn : this.user.dn,
+        bindpw : this.user.password,
         basedn : 'dc=my-domain,dc=com'
     };
     done();
@@ -113,7 +89,7 @@ exports._create_client = {
     'get valid and connected client' : function(test) {
         test.expect(3);
         var pool = new this.plugin.LdapPool(this.cfg);
-        var user = this.users[0];
+        var user = this.user;
         var tests = function (err, client) {
             test.equals(null, err);
             test.equals(undefined, client._starttls);

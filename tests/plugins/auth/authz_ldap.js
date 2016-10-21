@@ -3,44 +3,21 @@
 var fixtures     = require('haraka-test-fixtures');
 var ldappool     = require('../../../plugins/ldappool.js');
 
-// test user data as defined in testdata.ldif
-var users = [
-    {
+var _set_up = function (done) {
+    this.user = {
         uid : 'user1',
         dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
         password : 'ykaHsOzEZD',
         mail : 'user1@my-domain.com'
-    },
-    {
-        uid : 'user2',
-        dn : 'uid=user2,ou=people,dc=my-domain,dc=com',
-        password : 'KQD9zs,LGv',
-        mail : 'user2@my-domain.com'
-    },
-    {
-        uid : 'nonuniqe',
-        dn : 'uid=nonunique,ou=users,dc=my-domain,dc=com',
-        password : 'CZVm3,BLlx',
-        mail : 'nonuniqe1@my-domain.com'
-    },
-    {
-        uid : 'nonuniqe',
-        dn : 'uid=nonunique,ou=people,dc=my-domain,dc=com',
-        password : 'LsBHDGorAh',
-        mail : 'nonuniqe2@my-domain.com'
-    }
-];
-var _set_up =
-        function (done) {
-    this.users = users;
+    };
     this.plugin = new fixtures.plugin('auth/authz_ldap');
     this.plugin.cfg = { main : { } };
     this.connection = fixtures.connection.createConnection();
     this.plugin.init_authz_ldap(function(){}, {
         notes : {
             ldappool : new ldappool.LdapPool({
-                binddn : this.users[0].dn,
-                bindpw : this.users[0].password,
+                binddn : this.user.dn,
+                bindpw : this.user.password,
                 basedn : 'dc=my-domain,dc=com'
             })
         }
@@ -54,7 +31,7 @@ exports._verify_address = {
     '1 entry' : function(test) {
         test.expect(1);
         var plugin = this.plugin;
-        var user = this.users[0];
+        var user = this.user;
         plugin._verify_address(user.uid, user.mail, function(err, result) {
             test.equals(true, result);
             test.done();
@@ -80,7 +57,7 @@ exports._verify_address = {
     'invalid search filter' : function(test) {
         test.expect(2);
         var plugin = this.plugin;
-        var user = this.users[0];
+        var user = this.user;
         plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
         plugin._verify_address(user.uid, user.mail, function(err, result) {
             test.equals('Error: (|(uid=user has unbalanced parentheses', err.toString());
@@ -92,7 +69,7 @@ exports._verify_address = {
         test.expect(2);
         var plugin = this.plugin;
         plugin.pool = undefined;
-        var user = this.users[0];
+        var user = this.user;
         plugin._verify_address(user.uid, user.mail, function (err, userdn) {
             test.equals('LDAP Pool not found!', err);
             test.equals(false, userdn);
