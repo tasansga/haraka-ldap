@@ -85,6 +85,15 @@ exports.init_authz_ldap = function(next, server) {
 
 exports.check_authz = function(next, connection, params) {
     var plugin = this;
+    if (!connection.notes ||
+            !connection.notes.auth_user ||
+            !params ||
+            params.length === 0) {
+        plugin.logerror('Invalid call. Given params:' +
+                        ' connection.notes:' + connection.notes.toString() +
+                        ' params:' + params);
+        return next(DENYSOFT);
+    }
     var uid = connection.notes.auth_user;
     var address = params[0];
     //var address = connection.transaction.mail_from.address().toString();

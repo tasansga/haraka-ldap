@@ -179,5 +179,23 @@ exports.check_authz = {
         plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
         this.connection.notes = { auth_user : 'user1' };
         plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
+    },
+    'denysoft on missing auth_user' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        var callback = function(err) {
+            test.equals(DENYSOFT, err);
+            test.done();
+        };
+        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
+    },
+    'denysoft on missing address' : function(test) {
+        var plugin = this.plugin;
+        test.expect(1);
+        var callback = function(err) {
+            test.equals(DENYSOFT, err);
+            test.done();
+        };
+        plugin.check_authz(callback, this.connection);
     }
 };
