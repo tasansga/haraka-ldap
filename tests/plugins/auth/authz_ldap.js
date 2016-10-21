@@ -104,13 +104,21 @@ exports._verify_address = {
 exports._get_search_conf = {
     setUp : _set_up,
     'get defaults' : function(test) {
-        test.expect(0);
-        // TODO
+        test.expect(3);
+        var opts = this.plugin._get_search_conf('testUid', 'testMail');
+        test.equals(opts.filter, '(&(objectclass=*)(uid=testUid)(mailLocalAddress=testMail))');
+        test.equals(opts.scope, 'sub');
+        test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
-        test.expect(0);
-        // TODO
+        this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u)(mail=%a))';
+        this.plugin.cfg.main.scope = 'single';
+        test.expect(3);
+        var opts = this.plugin._get_search_conf('testUid', 'testMail');
+        test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid)(mail=testMail))');
+        test.equals(opts.scope, 'single');
+        test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     }
 };
