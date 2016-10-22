@@ -76,17 +76,17 @@ exports._get_search_conf = {
         test.expect(3);
         var opts = this.plugin._get_search_conf('testMail');
         test.equals(opts.filter, '(&(objectclass=*)(mailLocalAddress=testMail))');
-        test.equals(opts.scope, 'sub');
+        test.equals(opts.scope, this.plugin.pool.config.scope);
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
         this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(mail=%a))';
-        this.plugin.cfg.main.scope = 'single';
+        this.plugin.cfg.main.scope = 'one';
         test.expect(3);
         var opts = this.plugin._get_search_conf('testMail');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(mail=testMail))');
-        test.equals(opts.scope, 'single');
+        test.equals(opts.scope, 'one');
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     }

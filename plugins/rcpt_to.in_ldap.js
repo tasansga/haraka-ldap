@@ -49,7 +49,7 @@ exports._get_search_conf = function(address) {
     var config = {
         basedn: this.pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.main.scope || 'sub',
+        scope: plugin.cfg.main.scope || this.pool.config.scope,
         attributes: [ 'dn' ]
     };
     if (config.basedn === undefined) {
