@@ -99,18 +99,17 @@ exports._get_search_conf = {
         var opts = this.plugin._get_search_conf('testUid');
         test.equals(opts.filter, '(&(objectclass=*)(uid=testUid))');
         test.equals(opts.scope, 'sub');
-        test.equals(opts.attributes.toString(), ['dn', 'mail'].toString());
+        test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
         this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u))';
         this.plugin.cfg.main.scope = 'single';
-        this.plugin.cfg.main.mail_attribute = 'mailLocalAddress';
         test.expect(3);
         var opts = this.plugin._get_search_conf('testUid');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid))');
         test.equals(opts.scope, 'single');
-        test.equals(opts.attributes.toString(), ['dn', 'mailLocalAddress'].toString());
+        test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     }
 };
@@ -221,10 +220,9 @@ exports.register = {
     },
     'load configuration file' : function(test) {
         var plugin = this.plugin;
-        test.expect(3);
+        test.expect(2);
         this.plugin.register();
         test.equals('sub', plugin.cfg.main.scope);
-        test.equals('mailLocalAddress', plugin.cfg.main.mail_attribute);
         test.equals('(&(objectclass=*)(uid=%u))', plugin.cfg.main.searchfilter);
         test.done();
     }

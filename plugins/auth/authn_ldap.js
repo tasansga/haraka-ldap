@@ -39,7 +39,7 @@ exports._get_search_conf = function(user) {
         basedn: this.pool.config.basedn,
         filter: filter,
         scope: plugin.cfg.main.scope || 'sub',
-        attributes: ['dn', plugin.cfg.main.mail_attribute || 'mail']
+        attributes: ['dn']
     };
     if (config.basedn === undefined) {
         plugin.logerror("Undefined basedn. Please check your configuration!");
