@@ -15,7 +15,7 @@ exports._verify_existence = function (address, callback) {
     if (!this.pool) {
         return onError('LDAP Pool not found!');
     }
-    var dnSearch = function (err, client) {
+    var search = function (err, client) {
         if (err) {
             return onError(err);
         }
@@ -39,7 +39,7 @@ exports._verify_existence = function (address, callback) {
             }
         }
     };
-    this.pool.get(dnSearch);
+    this.pool.get(search);
 };
 
 exports._get_search_conf = function(address) {

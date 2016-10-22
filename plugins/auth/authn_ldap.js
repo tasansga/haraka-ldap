@@ -56,7 +56,7 @@ exports._get_dn_for_uid = function (uid, callback) {
     if (!this.pool) {
         return onError('LDAP Pool not found!');
     }
-    var dnSearch = function (err, client) {
+    var search = function (err, client) {
         if (err) {
             return onError(err);
         }
@@ -80,7 +80,7 @@ exports._get_dn_for_uid = function (uid, callback) {
             }
         }
     };
-    this.pool.get(dnSearch);
+    this.pool.get(search);
 };
 
 exports.hook_capabilities = function (next, connection) {
