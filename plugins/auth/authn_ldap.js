@@ -2,7 +2,7 @@
 
 /**
  * authn_ldap.js
- * This haraka module implements authentication agains LDAP servers,
+ * This haraka plugin implements authentication agains LDAP servers,
  * i.e. it checks if the given user credentials are valid in LDAP.
  */
 

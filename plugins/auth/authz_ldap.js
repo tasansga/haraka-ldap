@@ -2,7 +2,7 @@
 
 /**
  * authz_ldap.js
- * This haraka module implements authorization agains LDAP servers,
+ * This haraka plugin implements authorization agains LDAP servers,
  * i.e. if the given user is allowed to use the given from address.
  */
 
@@ -99,7 +99,7 @@ exports.check_authz = function(next, connection, params) {
     //var address = connection.transaction.mail_from.address().toString();
     var callback = function(err, verified) {
         if (err) {
-            plugin.logerror('Could not use LDAP for address check: ' + err);
+            plugin.logerror('Could not use LDAP to match address to uid: ' + err);
             next(DENYSOFT);
         }
         else if (!verified) {
