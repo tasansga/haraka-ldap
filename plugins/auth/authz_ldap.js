@@ -89,9 +89,10 @@ exports.check_authz = function(next, connection, params) {
             !connection.notes.auth_user ||
             !params ||
             params.length === 0) {
-        plugin.logerror('Invalid call. Given params:' +
-                        ' connection.notes:' + connection.notes.toString() +
-                        ' params:' + params);
+        var util = require('util');
+        plugin.logerror('Invalid call. Given params are ' +
+                        ' connection.notes:' + util.inspect(connection.notes) +
+                        ' and params:' + util.inspect(params));
         return next(DENYSOFT);
     }
     var uid = connection.notes.auth_user;
