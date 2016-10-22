@@ -118,20 +118,18 @@ exports.init_authn_ldap = function(next, server) {
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
-    var errWhileCheck = function(err) {
-        plugin.logerror("Could not use LDAP for password check: " + err);
-        return cb(false);
-    };
-    plugin._get_dn_for_uid(user, function(err, userdn) {
+    var callback = function(err, userdn) {
         if (err) {
-            errWhileCheck(err);
+            plugin.logerror("Could not use LDAP for password check: " + err);
+            return cb(false);
         }
         else if (userdn.length !== 1) {
             plugin.logdebug('None or nonunique LDAP search result for user, access denied');
-            return cb(false);
+            cb(false);
         }
         else {
             plugin._verify_user(userdn[0], passwd, cb);
         }
-    });
+    };
+    plugin._get_dn_for_uid(user, callback);
 };
