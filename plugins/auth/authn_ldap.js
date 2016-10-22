@@ -36,7 +36,7 @@ exports._get_search_conf = function(user) {
     var filter = plugin.cfg.main.filter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
     var config = {
-        basedn: this.pool.config.basedn,
+        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
         filter: filter,
         scope: plugin.cfg.main.scope || this.pool.config.scope,
         attributes: ['dn']

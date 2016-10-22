@@ -73,20 +73,23 @@ exports._verify_existence = {
 exports._get_search_conf = {
     setUp : _set_up,
     'get defaults' : function(test) {
-        test.expect(3);
+        test.expect(4);
         var opts = this.plugin._get_search_conf('testMail');
+        test.equals(opts.basedn, this.plugin.pool.config.basedn);
         test.equals(opts.filter, '(&(objectclass=*)(mailLocalAddress=testMail))');
         test.equals(opts.scope, this.plugin.pool.config.scope);
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
+        this.plugin.cfg.main.basedn = 'hop around as you like';
         this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(mail=%a))';
-        this.plugin.cfg.main.scope = 'one';
-        test.expect(3);
+        this.plugin.cfg.main.scope = 'one two three';
+        test.expect(4);
         var opts = this.plugin._get_search_conf('testMail');
+        test.equals(opts.basedn, 'hop around as you like');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(mail=testMail))');
-        test.equals(opts.scope, 'one');
+        test.equals(opts.scope, 'one two three');
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     }

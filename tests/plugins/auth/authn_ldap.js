@@ -95,20 +95,23 @@ exports.verify_user = {
 exports._get_search_conf = {
     setUp : _set_up,
     'get defaults' : function(test) {
-        test.expect(3);
+        test.expect(4);
         var opts = this.plugin._get_search_conf('testUid');
+        test.equals(opts.basedn, this.plugin.pool.config.basedn);
         test.equals(opts.filter, '(&(objectclass=*)(uid=testUid))');
         test.equals(opts.scope, this.plugin.pool.config.scope);
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
+        this.plugin.cfg.main.basedn = 'hop around as you like';
         this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u))';
-        this.plugin.cfg.main.scope = 'one';
-        test.expect(3);
+        this.plugin.cfg.main.scope = 'one two three';
+        test.expect(4);
         var opts = this.plugin._get_search_conf('testUid');
+        test.equals(opts.basedn, 'hop around as you like');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid))');
-        test.equals(opts.scope, 'one');
+        test.equals(opts.scope, 'one two three');
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     }

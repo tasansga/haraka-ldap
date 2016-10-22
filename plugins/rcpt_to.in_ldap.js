@@ -47,7 +47,7 @@ exports._get_search_conf = function(address) {
     var filter = plugin.cfg.main.filter || '(&(objectclass=*)(mail=%a))';
     filter = filter.replace(/%a/g, address);
     var config = {
-        basedn: this.pool.config.basedn,
+        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
         filter: filter,
         scope: plugin.cfg.main.scope || this.pool.config.scope,
         attributes: [ 'dn' ]
