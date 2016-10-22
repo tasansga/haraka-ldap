@@ -19,6 +19,7 @@ LdapPool.prototype._set_config = function(config) {
         timeout : config.timeout || 5000,
         tls_enabled : config.tls_enabled || false,
         tls_rejectUnauthorized : config.tls_rejectUnauthorized || undefined,
+        scope : config.scope || 'sub',
         binddn : config.binddn,
         bindpw : config.bindpw,
         basedn : config.basedn

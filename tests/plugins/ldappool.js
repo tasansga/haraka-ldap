@@ -21,7 +21,7 @@ var _set_up = function (done) {
 exports._set_config = {
     setUp : _set_up,
     'defaults' : function(test) {
-        test.expect(8);
+        test.expect(9);
         var pool = new this.plugin.LdapPool(this.cfg);
         var config = pool._set_config();
         test.equals(pool._set_config().toString(),
@@ -30,19 +30,21 @@ exports._set_config = {
         test.equals(5000, config.timeout);
         test.equals(false, config.tls_enabled);
         test.equals(undefined, config.tls_rejectUnauthorized);
+        test.equals('sub', config.scope);
         test.equals(undefined, config.binddn);
         test.equals(undefined, config.bindpw);
         test.equals(undefined, config.basedn);
         test.done();
     },
     'userdef' : function(test) {
-        test.expect(7);
+        test.expect(8);
         var pool = new this.plugin.LdapPool(this.cfg);
         var config = pool._set_config({
             server : 'testserver',
             timeout : 10000,
             tls_enabled : true,
             tls_rejectUnauthorized : true,
+            scope : 'one',
             binddn : 'binddn-test',
             bindpw : 'bindpw-test',
             basedn : 'basedn-test'
@@ -51,6 +53,7 @@ exports._set_config = {
         test.equals(10000, config.timeout);
         test.equals(true, config.tls_enabled);
         test.equals(true, config.tls_rejectUnauthorized);
+        test.equals('one', config.scope);
         test.equals('binddn-test', config.binddn);
         test.equals('bindpw-test', config.bindpw);
         test.equals('basedn-test', config.basedn);
@@ -203,7 +206,7 @@ exports.register = {
 exports._load_ldappool_ini = {
     setUp : _set_up,
     'check if values get loaded and set' : function(test) {
-        test.expect(3);
+        test.expect(4);
         var plugin = this.plugin;
         var server = { notes: { } };
         var next = function() {
@@ -211,12 +214,13 @@ exports._load_ldappool_ini = {
             test.equals('uid=user1,ou=users,dc=my-domain,dc=com', server.notes.ldappool.config.binddn);
             test.equals('ykaHsOzEZD', server.notes.ldappool.config.bindpw);
             test.equals('my-domain.com', server.notes.ldappool.config.basedn);
+            test.equals('base', server.notes.ldappool.config.scope);
         };
         plugin._init_ldappool(next, server);
         test.done();
     },
     'set _tmp_pool_config if pool is not available' : function(test) {
-        test.expect(4);
+        test.expect(5);
         var plugin = this.plugin;
         test.equals(undefined, plugin._tmp_pool_config);
         plugin._load_ldappool_ini();
@@ -224,6 +228,7 @@ exports._load_ldappool_ini = {
         test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
         test.equals('ykaHsOzEZD', conf.bindpw);
         test.equals('my-domain.com', conf.basedn);
+        test.equals('base', conf.scope);
         test.done();
     }
 };
