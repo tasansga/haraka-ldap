@@ -2,8 +2,8 @@
 
 /**
  * authz_ldap.js
- * This haraka plugin implements authorization agains LDAP servers,
- * i.e. if the given user is allowed to use the given from address.
+ * This haraka plugin implements authorization against LDAP servers,
+ * i.e. if the given user is allowed to use the given "FROM" address.
  */
 
 
