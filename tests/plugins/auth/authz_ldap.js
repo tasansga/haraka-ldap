@@ -22,7 +22,7 @@ var _set_up = function (done) {
             })
         }
     });
-    this.plugin.cfg.main.filter =  '(&(objectclass=*)(uid=%u)(mailLocalAddress=%a))';
+    this.plugin.cfg.main.searchfilter =  '(&(objectclass=*)(uid=%u)(mailLocalAddress=%a))';
     done();
 };
 
@@ -48,7 +48,7 @@ exports._verify_address = {
     '2 entries' : function(test) {
         test.expect(1);
         var plugin = this.plugin;
-        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u)(uid=user2)))';
+        plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(uid=%u)(uid=user2)))';
         plugin._verify_address('user1', 'who cares', function(err, result) {
             test.equals(true, result);
             test.done();
@@ -58,7 +58,7 @@ exports._verify_address = {
         test.expect(2);
         var plugin = this.plugin;
         var user = this.user;
-        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
+        plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(uid=%u';
         plugin._verify_address(user.uid, user.mail, function(err, result) {
             test.equals('Error: (|(uid=user has unbalanced parentheses', err.toString());
             test.equals(false, result);
@@ -91,7 +91,7 @@ exports._get_search_conf = {
     },
     'get userdef' : function(test) {
         this.plugin.cfg.main.basedn = 'hop around as you like';
-        this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u)(mail=%a))';
+        this.plugin.cfg.main.searchfilter = '(&(objectclass=posixAccount)(uid=%u)(mail=%a))';
         this.plugin.cfg.main.scope = 'one two three';
         test.expect(4);
         var opts = this.plugin._get_search_conf('testUid', 'testMail');
@@ -179,7 +179,7 @@ exports.check_authz = {
             test.equals(DENYSOFT, err);
             test.done();
         };
-        plugin.cfg.main.filter =  '(&(objectclass=*)(|(uid=%u';
+        plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(uid=%u';
         this.connection.notes = { auth_user : 'user1' };
         plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
     },

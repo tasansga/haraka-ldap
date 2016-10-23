@@ -33,7 +33,7 @@ exports._verify_user = function (userdn, passwd, cb) {
 
 exports._get_search_conf = function(user) {
     var plugin = this;
-    var filter = plugin.cfg.main.filter || '(&(objectclass=*)(uid=%u))';
+    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
     var config = {
         basedn: plugin.cfg.main.basedn || this.pool.config.basedn,

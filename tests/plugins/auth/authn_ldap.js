@@ -105,7 +105,7 @@ exports._get_search_conf = {
     },
     'get userdef' : function(test) {
         this.plugin.cfg.main.basedn = 'hop around as you like';
-        this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(uid=%u))';
+        this.plugin.cfg.main.searchfilter = '(&(objectclass=posixAccount)(uid=%u))';
         this.plugin.cfg.main.scope = 'one two three';
         test.expect(4);
         var opts = this.plugin._get_search_conf('testUid');
@@ -151,7 +151,7 @@ exports.get_dn_for_uid = {
         test.expect(2);
         var plugin = this.plugin;
         var user = this.users[0];
-        plugin.cfg.main.filter = '(&(objectclass=*)(uid=%u';
+        plugin.cfg.main.searchfilter = '(&(objectclass=*)(uid=%u';
         plugin._get_dn_for_uid(user.uid, function (err, userdn) {
             test.equals('Error: (uid=user has unbalanced parentheses', err.toString());
             test.equals(undefined, userdn);

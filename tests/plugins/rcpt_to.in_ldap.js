@@ -23,7 +23,7 @@ var _set_up = function (done) {
             })
         }
     });
-    this.plugin.cfg.main.filter =  '(&(objectclass=*)(mailLocalAddress=%a))';
+    this.plugin.cfg.main.searchfilter =  '(&(objectclass=*)(mailLocalAddress=%a))';
     done();
 };
 
@@ -50,7 +50,7 @@ exports._verify_existence = {
         test.expect(2);
         var plugin = this.plugin;
         var user = this.user;
-        plugin.cfg.main.filter =  '(&(objectclass=*)(|(mail=%a';
+        plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(mail=%a';
         plugin._verify_existence(user.mail, function(err, result) {
             test.equals('Error: (|(mail=user1@my-domain.co has unbalanced parentheses', err.toString());
             test.equals(false, result);
@@ -83,7 +83,7 @@ exports._get_search_conf = {
     },
     'get userdef' : function(test) {
         this.plugin.cfg.main.basedn = 'hop around as you like';
-        this.plugin.cfg.main.filter = '(&(objectclass=posixAccount)(mail=%a))';
+        this.plugin.cfg.main.searchfilter = '(&(objectclass=posixAccount)(mail=%a))';
         this.plugin.cfg.main.scope = 'one two three';
         test.expect(4);
         var opts = this.plugin._get_search_conf('testMail');
@@ -161,7 +161,7 @@ exports.check_rcpt = {
             test.equals(DENYSOFT, err);
             test.done();
         };
-        plugin.cfg.main.filter =  '(&(objectclass=*)(|(mail=%a';
+        plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(mail=%a';
         this.connection.transaction.rcpt_to = ['user1@my-domain.com'];
         plugin.check_rcpt(callback, this.connection, []);
     },

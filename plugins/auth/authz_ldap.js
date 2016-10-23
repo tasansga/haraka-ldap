@@ -45,7 +45,7 @@ exports._verify_address = function (uid, address, callback) {
 
 exports._get_search_conf = function(user, address) {
     var plugin = this;
-    var filter = plugin.cfg.main.filter || '(&(objectclass=*)(uid=%u)(mail=%a))';
+    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(uid=%u)(mail=%a))';
     filter = filter.replace(/%u/g, user).replace(/%a/g, address);
     var config = {
         basedn: plugin.cfg.main.basedn || this.pool.config.basedn,

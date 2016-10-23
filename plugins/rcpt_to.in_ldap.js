@@ -44,7 +44,7 @@ exports._verify_existence = function (address, callback) {
 
 exports._get_search_conf = function(address) {
     var plugin = this;
-    var filter = plugin.cfg.main.filter || '(&(objectclass=*)(mail=%a))';
+    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(mail=%a))';
     filter = filter.replace(/%a/g, address);
     var config = {
         basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
