@@ -151,8 +151,9 @@ exports.check_rcpt = {
             test.equals(undefined, err);
             test.done();
         };
-        this.connection.transaction.rcpt_to = ['user1@my-domain.com'];
-        plugin.check_rcpt(callback, this.connection, []);
+        plugin.check_rcpt(callback, this.connection, [{
+            address : function(){ return 'user1@my-domain.com'; }
+        }]);
     },
     'denysoft on error' : function(test) {
         var plugin = this.plugin;
@@ -162,27 +163,17 @@ exports.check_rcpt = {
             test.done();
         };
         plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(mail=%a';
-        this.connection.transaction.rcpt_to = ['user1@my-domain.com'];
-        plugin.check_rcpt(callback, this.connection, []);
+        plugin.check_rcpt(callback, this.connection, [{
+            address : function(){ return 'user1@my-domain.com'; }
+        }]);
     },
-    'denysoft on missing rcpt_to array' : function(test) {
+    'denysoft on missing params[0]' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
             test.equals(DENYSOFT, err);
             test.done();
         };
-        this.connection.transaction.rcpt_to = undefined;
-        plugin.check_rcpt(callback, this.connection, []);
-    },
-    'denysoft on missing rcpt_to content' : function(test) {
-        var plugin = this.plugin;
-        test.expect(1);
-        var callback = function(err) {
-            test.equals(DENYSOFT, err);
-            test.done();
-        };
-        this.connection.transaction.rcpt_to = [ ];
         plugin.check_rcpt(callback, this.connection, []);
     },
     'deny on invalid address' : function(test) {
@@ -192,7 +183,8 @@ exports.check_rcpt = {
             test.equals(DENY, err);
             test.done();
         };
-        this.connection.transaction.rcpt_to = [ 'unknown@address' ];
-        plugin.check_rcpt(callback, this.connection, []);
+        plugin.check_rcpt(callback, this.connection, [{
+            address : function(){ return 'unknown@address'; }
+        }]);
     }
 };

@@ -83,15 +83,13 @@ exports.init_rcpt_to_in_ldap = function(next, server) {
 
 exports.check_rcpt = function(next, connection, params) {
     var plugin = this;
-    if (!connection.transaction ||
-            !connection.transaction.rcpt_to ||
-            connection.transaction.rcpt_to.length === 0) {
+    if (!params || !params[0] || !params[0].address) {
         var util = require('util');
         plugin.logerror('Invalid call. Given connection.transaction:' +
                         util.inspect(connection.transaction));
         return next(DENYSOFT);
     }
-    var rcpt = connection.transaction.rcpt_to[connection.transaction.rcpt_to.length - 1];
+    var rcpt   = params[0].address();
     var callback = function(err, result) {
         if (err) {
             plugin.logerror('Could not use LDAP for address check: ' + err);
