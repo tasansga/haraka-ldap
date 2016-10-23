@@ -59,7 +59,6 @@ exports._get_search_conf = function(address) {
 };
 
 exports.register = function() {
-    this.inherits('auth/auth_base');
     var plugin = this;
     plugin.register_hook('init_master',  'init_rcpt_to_in_ldap');
     plugin.register_hook('init_child',   'init_rcpt_to_in_ldap');
