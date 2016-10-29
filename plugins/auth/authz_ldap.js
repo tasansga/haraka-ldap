@@ -1,5 +1,8 @@
 'use strict';
 
+var util = require('util');
+
+
 /**
  * authz_ldap.js
  * This haraka plugin implements authorization against LDAP servers,
@@ -88,7 +91,6 @@ exports.check_authz = function(next, connection, params) {
             !connection.notes.auth_user ||
             !params ||
             params.length === 0) {
-        var util = require('util');
         plugin.logerror('Invalid call. Given params are ' +
                         ' connection.notes:' + util.inspect(connection.notes) +
                         ' and params:' + util.inspect(params));

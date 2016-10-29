@@ -139,7 +139,7 @@ exports._init_ldappool = function(next, server) {
         if (plugin._tmp_pool_config) {
             server.notes.ldappool._set_config(plugin._tmp_pool_config);
             plugin._tmp_pool_config = undefined;
-            plugin.logdebug('Current config: ' + util.inspect(plugin._pool.config));
+            plugin.logdebug('Current config: ' + util.inspect(server.notes.ldappool.config));
         }
     }
     this._pool = server.notes.ldappool;

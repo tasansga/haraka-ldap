@@ -1,5 +1,8 @@
 'use strict';
 
+var util = require('util');
+
+
 /**
  * rcpt_to.in_ldap.js
  * This haraka plugin check if a given recipient address exists in LDAP.
@@ -84,7 +87,6 @@ exports.init_rcpt_to_in_ldap = function(next, server) {
 exports.check_rcpt = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        var util = require('util');
         plugin.logerror('Invalid call. Given connection.transaction:' +
                         util.inspect(connection.transaction));
         return next(DENYSOFT);
