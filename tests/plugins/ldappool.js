@@ -27,7 +27,7 @@ exports._set_config = {
         test.equals(pool._set_config().toString(),
                     pool._set_config({}).toString());
         test.equals('ldap://localhost:389', config.server);
-        test.equals(5000, config.timeout);
+        test.equals(undefined, config.timeout);
         test.equals(false, config.tls_enabled);
         test.equals(undefined, config.tls_rejectUnauthorized);
         test.equals('sub', config.scope);
@@ -68,7 +68,7 @@ exports._get_ldapjs_config = {
         var pool = new this.plugin.LdapPool(this.cfg);
         var config = pool._get_ldapjs_config();
         test.equals('ldap://localhost:389', config.url);
-        test.equals(5000, config.timeout);
+        test.equals(undefined, config.timeout);
         test.equals(undefined, config.tlsOptions);
         test.done();
     },

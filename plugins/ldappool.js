@@ -16,7 +16,7 @@ LdapPool.prototype._set_config = function(config) {
     if (config === undefined) { config = {}; }
     this.config = {
         server : config.server || 'ldap://localhost:389',
-        timeout : config.timeout || 5000,
+        timeout : config.timeout || undefined,
         tls_enabled : config.tls_enabled || false,
         tls_rejectUnauthorized : config.tls_rejectUnauthorized || undefined,
         scope : config.scope || 'sub',
