@@ -10,8 +10,8 @@ Configuration
 All configuration is done in `config/ldappool.ini`.
 The following options are configurable:
 
-* `server`: *optional*  
-Specify LDAP server addresses, default: server[]=*ldap://localhost:389*  
+* `server`: *optional*, default: server[]=*ldap://localhost:389*  
+Specify LDAP server addresses.
 This is an array of *url* from [ldapjs](http://ldapjs.org/client.html).
 Apply multiple server[] values for some simple load-balancing.
 * `timeout`: *optional*, default: No timeout.  
@@ -29,7 +29,7 @@ This is the same as *scope* from [ldapjs](http://ldapjs.org/client.html).
 * `binddn`: *optional*, default: not set  
 The binddn is basically the LDAP user to be used to look up data in LDAP. It
 is optional (the LDAP server might allow anonymous binds).
-* `bindpw`: *optional*, default: not set
+* `bindpw`: *optional*, default: not set  
 A bindpw might be necessary to bind with the given binddn. It can be supplied
 here. 
 * `basedn`: *required*, default: not set  
