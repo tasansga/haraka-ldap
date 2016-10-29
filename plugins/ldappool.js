@@ -1,5 +1,9 @@
 'use strict';
 
+var ldap = require('ldapjs');
+var util = require('util');
+
+
 /**
  * ldappool.js
  * This haraka module implements pooling of bound LDAP connections to avoid
@@ -9,16 +13,16 @@
 
 var LdapPool = function(config) {
     this._set_config(config);
-    this.pool = { '*' : { 'servers' : [] } };
+    this.pool = { 'servers' : [] };
 };
 
 LdapPool.prototype._set_config = function(config) {
     if (config === undefined) { config = {}; }
     this.config = {
-        server : config.server || 'ldap://localhost:389',
-        timeout : config.timeout || undefined,
+        servers : config.server || [ 'ldap://localhost:389' ],
+        timeout : config.timeout,
         tls_enabled : config.tls_enabled || false,
-        tls_rejectUnauthorized : config.tls_rejectUnauthorized || undefined,
+        tls_rejectUnauthorized : config.tls_rejectUnauthorized,
         scope : config.scope || 'sub',
         binddn : config.binddn,
         bindpw : config.bindpw,
@@ -29,9 +33,10 @@ LdapPool.prototype._set_config = function(config) {
 
 LdapPool.prototype._get_ldapjs_config = function() {
     var config = { // see: http://ldapjs.org/client.html
-        url: this.config.server,
+        url: this.config.servers.shift(),
         timeout: this.config.timeout
     };
+    this.config.servers.push(config.url);
     if (this.config.tls_rejectUnauthorized !== undefined) {
         config.tlsOptions = {
             rejectUnauthorized: this.config.tls_rejectUnauthorized
@@ -41,7 +46,6 @@ LdapPool.prototype._get_ldapjs_config = function() {
 };
 
 LdapPool.prototype._create_client = function(next) {
-    var ldap = require('ldapjs');
     var client = ldap.createClient(this._get_ldapjs_config());
     var starttls = function(err) {
         if (err) {
@@ -58,9 +62,9 @@ LdapPool.prototype._create_client = function(next) {
 };
 
 LdapPool.prototype.close = function(next) {
-    if (this.pool['*']['servers'].length > 0) {
-        while (this.pool['*']['servers'].length > 0) {
-            this.pool['*']['servers'].shift().unbind(next);
+    if (this.pool['servers'].length > 0) {
+        while (this.pool['servers'].length > 0) {
+            this.pool['servers'].shift().unbind(next);
         }
     }
     else {
@@ -90,16 +94,14 @@ LdapPool.prototype._bind_default = function(next) {
 
 LdapPool.prototype.get = function(next) {
     var pool = this.pool;
-    if (pool['*']['servers'].length > 0) {
+    if (pool['servers'].length >= this.config.servers.length) {
         // shift and push for round-robin
-        var client = pool['*']['servers'].shift();
-        if (client.connected) {
-            pool['*']['servers'].push(client);
-            return next(null, client);
-        }
+        var client = pool['servers'].shift();
+        pool['servers'].push(client);
+        return next(null, client);
     }
     var setClient = function(err, client) {
-        pool['*']['servers'].push(client);
+        pool['servers'].push(client);
         return next(err, client);
     };
     this._bind_default(setClient);
@@ -123,6 +125,7 @@ exports._load_ldappool_ini = function() {
     });
     if (plugin._pool) {
         plugin._pool._set_config(cfg.main);
+        plugin.logdebug('Current config: ' + util.inspect(plugin._pool.config));
     }
     else {
         plugin._tmp_pool_config = cfg.main;
@@ -136,6 +139,7 @@ exports._init_ldappool = function(next, server) {
         if (plugin._tmp_pool_config) {
             server.notes.ldappool._set_config(plugin._tmp_pool_config);
             plugin._tmp_pool_config = undefined;
+            plugin.logdebug('Current config: ' + util.inspect(plugin._pool.config));
         }
     }
     this._pool = server.notes.ldappool;

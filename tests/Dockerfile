@@ -17,7 +17,8 @@ RUN \
     rm -f /config.ldif /testdata.ldif
 
 EXPOSE 389
+EXPOSE 636
 
-ENTRYPOINT ["/usr/sbin/slapd", "-u", "ldap", "-h" , "ldap:///", "-d129"]
+ENTRYPOINT ["/usr/sbin/slapd", "-u", "ldap", "-h" , "ldap:/// ldaps:///", "-d129"]
 
-# run with: docker run -p 389:389 [...] 
+# run with: docker run -p 389:389 -p 636:636 [...] 

@@ -11,6 +11,7 @@ var _set_up = function (done) {
     };
     this.plugin = new fixtures.plugin('ldappool');
     this.cfg = {
+        server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
         binddn : this.user.dn,
         bindpw : this.user.password,
         basedn : 'dc=my-domain,dc=com'
@@ -26,7 +27,7 @@ exports._set_config = {
         var config = pool._set_config();
         test.equals(pool._set_config().toString(),
                     pool._set_config({}).toString());
-        test.equals('ldap://localhost:389', config.server);
+        test.equals(['ldap://localhost:389'].toString(), config.servers.toString());
         test.equals(undefined, config.timeout);
         test.equals(false, config.tls_enabled);
         test.equals(undefined, config.tls_rejectUnauthorized);
@@ -49,7 +50,7 @@ exports._set_config = {
             bindpw : 'bindpw-test',
             basedn : 'basedn-test'
         });
-        test.equals('testserver', config.server);
+        test.equals('testserver', config.servers);
         test.equals(10000, config.timeout);
         test.equals(true, config.tls_enabled);
         test.equals(true, config.tls_rejectUnauthorized);
@@ -74,7 +75,7 @@ exports._get_ldapjs_config = {
     },
     'userdef' : function(test) {
         test.expect(3);
-        this.cfg.server = 'ldap://127.0.0.1:389';
+        this.cfg.server = [ 'ldap://127.0.0.1:389' ];
         this.cfg.timeout = 42;
         this.cfg.tls_rejectUnauthorized = true;
         this.cfg.ldap_pool_size = 20;
@@ -124,7 +125,7 @@ exports.close = {
     'test if connections are closed after call' : function(test) {
         test.expect(4);
         var pool = new this.plugin.LdapPool(this.cfg);
-        test.equals(0, pool.pool['*']['servers'].length);
+        test.equals(0, pool.pool['servers'].length);
         var testClose = function(err, client) {
             test.equals(true, client.connected);
             test.equals(undefined, client.unbound);
@@ -175,14 +176,22 @@ exports._bind_default = {
 exports.get = {
     setUp : _set_up,
     'test connection validity and pooling' : function(test) {
-        test.expect(3);
+        test.expect(9);
         var pool = new this.plugin.LdapPool(this.cfg);
-        test.equals(0, pool.pool['*']['servers'].length);
+        test.equals(0, pool.pool['servers'].length);
         var tests = function(err, client) {
             test.equals(null, err);
-            test.equals(1, pool.pool['*']['servers'].length);
+            test.equals(1, pool.pool['servers'].length);
+            test.equals('ldap://localhost:389', client.url.href);
             pool.get(function(err, client) {
-                test.done();
+                test.equals(null, err);
+                test.equals(2, pool.pool['servers'].length);
+                test.equals('ldaps://localhost:636', client.url.href);
+                pool.get(function(err, client) {
+                    test.equals(2, pool.pool['servers'].length);
+                    test.equals('ldap://localhost:389', client.url.href);
+                    test.done();
+                });
             });
         };
         pool.get(tests);
