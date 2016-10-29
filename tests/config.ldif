@@ -27,37 +27,3 @@ olcTLSCertificateKeyFile: /etc/openldap/certs/slapdkey.pem
 replace: olcTLSCertificateFile
 olcTLSCertificateFile: /etc/openldap/certs/slapdcert.pem
 
-# enable openldap memberof overlay
-dn: cn=module,cn=config
-changetype: add
-cn: module
-objectclass: olcModuleList
-objectclass: top
-olcmoduleload: memberof.la
-olcmodulepath: /usr/lib64/openldap
-
-dn: olcOverlay={0}memberof,olcDatabase={2}mdb,cn=config
-changetype: add
-objectClass: olcConfig
-objectClass: olcMemberOf
-objectClass: olcOverlayConfig
-objectClass: top
-olcOverlay: memberof
-
-dn: cn=module,cn=config
-changetype: add
-cn: module
-objectclass: olcModuleList
-objectclass: top
-olcmoduleload: refint.la
-olcmodulepath: /usr/lib64/openldap
-
-dn: olcOverlay={1}refint,olcDatabase={2}mdb,cn=config
-changetype: add
-objectClass: olcConfig
-objectClass: olcOverlayConfig
-objectClass: olcRefintConfig
-objectClass: top
-olcOverlay: {1}refint
-olcRefintAttribute: memberof member owner
-
