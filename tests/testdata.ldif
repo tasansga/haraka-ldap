@@ -75,7 +75,22 @@ cn: Nonunique Test User 2
 mailLocalAddress: nonunique2@my-domain.com
 userPassword: {SSHA}gLTxl9QpE1dHNgfZK9d3Ne8MKXtFRRfn
 
-# add group
+# add user who forwards mail
+# password is: 1QRSrUECyKLR
+dn: uid=forwarder,ou=people,dc=my-domain,dc=com
+changetype: add
+objectClass: top
+objectClass: uidObject
+objectClass: device
+objectClass: simpleSecurityObject
+objectClass: inetLocalMailRecipient
+uid: forwarder
+cn: Forwarding Test User
+mailLocalAddress: forwarder@my-domain.com
+mailRoutingAddress: user2@my-domain.com
+userPassword: {SSHA}h53i1Xy3/Hi27rr+krH/TwSGkEohfbxH
+
+# add group to resolve by-dn
 dn: cn=postmaster,dc=my-domain,dc=com
 changetype: add
 objectclass: top
@@ -83,6 +98,7 @@ objectclass: groupOfNames
 objectClass: inetLocalMailRecipient
 mailLocalAddress: postmaster@my-domain.com
 member: uid=user1,ou=users,dc=my-domain,dc=com
-member: uid=user2,ou=users,dc=my-domain,dc=com
-member: uid=nonuniqe,ou=users,dc=my-domain,dc=com
+member: uid=user2,ou=people,dc=my-domain,dc=com
+member: uid=nonunique,ou=users,dc=my-domain,dc=com
+member: uid=unknown,dc=wherever,dc=com
 
