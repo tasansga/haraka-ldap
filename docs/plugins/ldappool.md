@@ -11,35 +11,27 @@ All configuration is done in `config/ldappool.ini`.
 The following options are configurable:
 
 * `server`: *optional*  
-Specify LDAP server addresses.
+Specify LDAP server addresses, default: server[]=*ldap://localhost:389*  
 This is an array of *url* from [ldapjs](http://ldapjs.org/client.html).
 Apply multiple server[] values for some simple load-balancing.
-Default: server[]=*ldap://localhost:389*
-* `timeout`: *optional*  
+* `timeout`: *optional*, default: No timeout.  
 Define time out for LDAP ops.
 This is the same as *timeout* from [ldapjs](http://ldapjs.org/client.html).
-Default: No timeout.
-* `tls_enabled`: *optional*  
+* `tls_enabled`: *optional*, default: tls_enabled=*false*  
 Enable or disable TLS. If enabled, all LDAP connections will be secured first 
 by calling starttls.
-Default: tls_enabled=*false*
-* `tls_rejectUnauthorized`: *optional*  
+* `tls_rejectUnauthorized`: *optional*, default: tls_rejectUnauthorized=*false*  
 Enable or disable rejection of secured connections without valid server certificate.
 This is as *rejectUnauthorized* from the [node.js server API as used by ldapjs](https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener).
-Default: tls_rejectUnauthorized=*false*
-* `scope`: *optional*  
+* `scope`: *optional*, default: scope=*sub*  
 This defines the scope of the LDAP search operation, like *base* or *sub*.
 This is the same as *scope* from [ldapjs](http://ldapjs.org/client.html).
-Default: scope=*sub*
-* `binddn`: *optional*  
+* `binddn`: *optional*, default: not set  
 The binddn is basically the LDAP user to be used to look up data in LDAP. It
 is optional (the LDAP server might allow anonymous binds).
-Default: not set
-* `bindpw`: *optional*  
+* `bindpw`: *optional*, default: not set
 A bindpw might be necessary to bind with the given binddn. It can be supplied
 here. 
-Default: not set
-* `basedn`: *required*
+* `basedn`: *required*, default: not set  
 The basedn is a requirement for many LDAP options. It must be defined with
 this option.
-Default: not set
