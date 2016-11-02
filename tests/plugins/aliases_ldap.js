@@ -222,8 +222,8 @@ exports.aliases = {
     'next if no results' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
-        var next = function() {
-            test.ok(true);
+        var next = function(result) {
+            test.equals(undefined, result);
             test.done();
         };
         plugin.aliases(next, this.connection, [ { address : function() {
@@ -241,8 +241,9 @@ exports.aliases = {
             '<user2@my-domain.com>',
             '<nonunique1@my-domain.com>'
         ];
-        test.expect(1);
-        var next = function() {
+        test.expect(2);
+        var next = function(result) {
+            test.equals(OK, result);
             test.equals(expected.toString(), connection.transaction.rcpt_to.toString());
             test.done();
         };
@@ -255,8 +256,9 @@ exports.aliases = {
         var user = this.user;
         var connection = this.connection;
         connection.transaction = { rcpt_to : [ 'still the same' ] };
-        test.expect(1);
-        var next = function() {
+        test.expect(2);
+        var next = function(result) {
+            test.equals(undefined, result);
             test.equals('still the same', connection.transaction.rcpt_to.toString());
             test.done();
         };
@@ -270,8 +272,9 @@ exports.aliases = {
         connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
         this.plugin.cfg.main.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
         this.plugin.cfg.main.attribute = 'mailRoutingAddress';
-        test.expect(1);
-        var next = function() {
+        test.expect(2);
+        var next = function(result) {
+            test.equals(OK, result);
             test.equals('<user2@my-domain.com>', connection.transaction.rcpt_to.toString());
             test.done();
         };
