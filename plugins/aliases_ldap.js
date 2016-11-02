@@ -89,6 +89,9 @@ exports._resolve_dn_to_alias = function(dn, callback) {
                 if (search_error) { onError(search_error, dn); }
                 res.on('searchEntry', function(entry) {
                     var arr_addr = entry.object[config.attributes[0]];
+                    if (Array.isArray(arr_addr)) {
+                        arr_addr = arr_addr[0];
+                    }
                     searchCallback(null, arr_addr);
                 });
                 res.on('error', function(e) {
@@ -152,7 +155,7 @@ exports.aliases = function(next, connection, params) {
             var toAddress = new Address('<' + result[i] + '>');
             connection.transaction.rcpt_to.push(toAddress);
         }
-        next();
+        next(OK);
     };
     plugin._get_alias(rcpt, handleAliases);
 };
