@@ -2,6 +2,8 @@
 
 var fixtures     = require('haraka-test-fixtures');
 var ldappool     = require('../../../plugins/ldappool.js');
+var Address      = require('address-rfc2821').Address;
+
 
 var _set_up = function (done) {
     this.user = {
@@ -160,7 +162,7 @@ exports.check_authz = {
             test.done();
         };
         this.connection.notes = { auth_user : 'user1' };
-        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
+        plugin.check_authz(callback, this.connection, [new Address('<user1@my-domain.com>')]);
     },
     'deny if not authorized' : function(test) {
         var plugin = this.plugin;
@@ -170,7 +172,7 @@ exports.check_authz = {
             test.done();
         };
         this.connection.notes = { auth_user : 'user1' };
-        plugin.check_authz(callback, this.connection, ['user2@my-domain.com']);
+        plugin.check_authz(callback, this.connection, [new Address('user2@my-domain.com')]);
     },
     'denysoft on error' : function(test) {
         var plugin = this.plugin;
@@ -181,22 +183,22 @@ exports.check_authz = {
         };
         plugin.cfg.main.searchfilter =  '(&(objectclass=*)(|(uid=%u';
         this.connection.notes = { auth_user : 'user1' };
-        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
+        plugin.check_authz(callback, this.connection, [new Address('user1@my-domain.com')]);
     },
-    'denysoft on missing auth_user' : function(test) {
+    'ignore invalid params: missing auth_user' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENYSOFT, err);
+            test.equals(undefined, err);
             test.done();
         };
-        plugin.check_authz(callback, this.connection, ['user1@my-domain.com']);
+        plugin.check_authz(callback, this.connection, [new Address('user1@my-domain.com')]);
     },
-    'denysoft on missing address' : function(test) {
+    'ignore invalid params: missing address' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENYSOFT, err);
+            test.equals(undefined, err);
             test.done();
         };
         plugin.check_authz(callback, this.connection);

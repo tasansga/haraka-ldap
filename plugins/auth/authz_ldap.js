@@ -88,18 +88,15 @@ exports.init_authz_ldap = function(next, server) {
 
 exports.check_authz = function(next, connection, params) {
     var plugin = this;
-    if (!connection.notes ||
-            !connection.notes.auth_user ||
-            !params ||
-            params.length === 0) {
-        plugin.logerror('Invalid call. Given params are ' +
+    if (!connection.notes || !connection.notes.auth_user ||
+            !params || !params[0] || !params[0].address) {
+        plugin.logerror('Ignoring invalid call. Given params are ' +
                         ' connection.notes:' + util.inspect(connection.notes) +
                         ' and params:' + util.inspect(params));
-        return next(DENYSOFT);
+        return next();
     }
     var uid = connection.notes.auth_user;
-    var address = params[0];
-    //var address = connection.transaction.mail_from.address().toString();
+    var address = params[0].address();
     var callback = function(err, verified) {
         if (err) {
             plugin.logerror('Could not use LDAP to match address to uid: ' + err);
