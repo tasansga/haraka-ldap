@@ -25,6 +25,7 @@ exports._verify_address = function (uid, address, callback) {
         }
         else {
             var config = plugin._get_search_conf(uid, address);
+            plugin.logdebug('Verifying address: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }

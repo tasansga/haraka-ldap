@@ -1,5 +1,8 @@
 'use strict';
 
+var util = require('util');
+
+
 /**
  * authn_ldap.js
  * This haraka plugin implements authentication agains LDAP servers,
@@ -62,6 +65,7 @@ exports._get_dn_for_uid = function (uid, callback) {
         }
         else {
             var config = plugin._get_search_conf(uid);
+            plugin.logdebug('Getting DN for uid: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }

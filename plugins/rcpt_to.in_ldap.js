@@ -24,6 +24,7 @@ exports._verify_existence = function (address, callback) {
         }
         else {
             var config = plugin._get_search_conf(address);
+            plugin.logdebug('Verifying existence: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }

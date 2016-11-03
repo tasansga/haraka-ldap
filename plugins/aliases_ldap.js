@@ -27,6 +27,7 @@ exports._get_alias = function (address, callback) {
         }
         else {
             var config = plugin._get_search_conf_alias(address);
+            plugin.logdebug('Checking address for alias: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }
