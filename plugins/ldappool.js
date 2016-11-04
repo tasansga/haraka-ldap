@@ -147,7 +147,8 @@ exports._init_ldappool = function(next, server) {
 };
 
 exports.shutdown = function (next) {
+    var cb = next || function() { };
     if (this._pool) {
-        this._pool.close(next);
+        this._pool.close(cb);
     }
 };
