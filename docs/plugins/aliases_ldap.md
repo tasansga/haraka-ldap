@@ -1,6 +1,6 @@
 # aliases_ldap
 
-With aliases_ldap it is possible to query LDAP to resolve email aliases and to forward email to one or multiple configured targets. It utilized the ldappool plugin.
+With aliases_ldap it is possible to query LDAP to resolve email aliases and to forward email to one or multiple configured targets. It utilizes the ldappool plugin.
 
 ## Configuration
 All configuration is done in `config/aliases_ldap.ini`.

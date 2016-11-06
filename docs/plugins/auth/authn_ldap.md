@@ -1,6 +1,6 @@
 # auth/authn_ldap
 
-This haraka plugin implements authentication (authn) agains LDAP servers, i.e. it checks if the given user credentials are valid in LDAP. It can either search for the user DN first, or it can try to bind by predefined DN templates.
+This haraka plugin implements authentication (authn) agains LDAP servers, i.e. it checks if the given user credentials are valid in LDAP. It can either search for the user DN first, or it can try to bind by predefined DN templates and utilizes the ldappool plugin.
 
 ## Configuration
 All configuration is done in `config/authn_ldap.ini`.
@@ -10,9 +10,9 @@ It's possible to override ldappool's default basedn for this plugin.
 * `scope`: *optional*, default: as used by ldappool  
 It's possible to override ldappool's default scope for this plugin.
 * `searchfilter`: *optional*, default: (&(objectclass=*)(uid=%u))  
-Search filter to lookup the user's DN. The param %u denotes the uid/username as given during login. As result the search filter should return the object(s) to be used for a simple bind attempt. Authentication will fail if the search filter doesn't return exactly one matching object.
+Search filter to lookup the user's DN. The param `%u` denotes the uid/username as given during login. As result the search filter should return the object(s) to be used for a simple bind attempt. Authentication will fail if the search filter doesn't return exactly one matching object.
 * `dn`: *optional*, default: undefined  
-`dn` is an array of template DN to check for the given uid. This is an alternate mode of lookup, where the plugin inserts the uid in the DN template and immediately tries to bind instead of doing a search for the DN first. A template DN looks like `uid=%u,ou=users,dc=my-domain,dc=com`. The param %u denotes the uid/username as given during login.
+`dn` is an array of template DN to check for the given uid. This is an alternate mode of lookup, where the plugin inserts the uid in the DN template and immediately tries to bind instead of doing a search for the DN first. A template DN looks like `uid=%u,ou=users,dc=my-domain,dc=com`. The param `%u` denotes the uid/username as given during login.
 
 ## Examples
 Below are two examples to explain both modes of operation.
