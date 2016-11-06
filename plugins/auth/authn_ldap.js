@@ -124,10 +124,9 @@ exports.init_authn_ldap = function(next, server) {
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
     if (Array.isArray(plugin.cfg.main.dn)) {
-        plugin.logerror('Looking up user "' + user + '" by DN.');
+        plugin.logdebug('Looking up user "' + user + '" by DN.');
         var search = function(userdn, searchCallback) {
             var userdn = userdn.replace(/%u/g, user);
-            plugin.logerror(userdn);
             return plugin._verify_user(userdn, passwd, searchCallback);
         };
         var asyncCallback = function(result) {
