@@ -241,9 +241,11 @@ exports.aliases = {
             '<user2@my-domain.com>',
             '<nonunique1@my-domain.com>'
         ];
+        expected.sort();
         test.expect(2);
         var next = function(result) {
             test.equals(OK, result);
+            connection.transaction.rcpt_to.sort();
             test.equals(expected.toString(), connection.transaction.rcpt_to.toString());
             test.done();
         };
