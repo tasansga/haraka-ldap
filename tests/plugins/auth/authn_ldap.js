@@ -18,16 +18,16 @@ var users = [
         mail : 'user2@my-domain.com'
     },
     {
-        uid : 'nonuniqe',
+        uid : 'nonunique',
         dn : 'uid=nonunique,ou=users,dc=my-domain,dc=com',
         password : 'CZVm3,BLlx',
-        mail : 'nonuniqe1@my-domain.com'
+        mail : 'nonunique1@my-domain.com'
     },
     {
-        uid : 'nonuniqe',
+        uid : 'nonunique',
         dn : 'uid=nonunique,ou=people,dc=my-domain,dc=com',
         password : 'LsBHDGorAh',
-        mail : 'nonuniqe2@my-domain.com'
+        mail : 'nonunique2@my-domain.com'
     }
 ];
 
@@ -256,7 +256,7 @@ exports.init_authn_ldap = {
 
 exports.check_plain_passwd = {
     setUp : _set_up,
-    'check_plain_passwd with test users and invalid user' : function(test) {
+    'search with test users and invalid user' : function(test) {
         test.expect(5);
         var plugin = this.plugin;
         var users = this.users;
@@ -269,6 +269,29 @@ exports.check_plain_passwd = {
                     test.equals(false, result);
                     plugin.check_plain_passwd(connection, users[3].uid, users[3].password, function(result) {
                         test.equals(false, result);
+                        plugin.check_plain_passwd(connection, 'invalid', 'invalid', function(result) {
+                            test.equals(false, result);
+                            test.done();
+                        });
+                    });
+                });
+            });
+        });
+    },
+    'try dn with test users and invalid user' : function(test) {
+        test.expect(5);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        plugin.cfg.main.dn = [ 'uid=%u,ou=users,dc=my-domain,dc=com',
+                               'uid=%u,ou=people,dc=my-domain,dc=com' ];
+        plugin.check_plain_passwd(connection, users[0].uid, users[0].password, function(result) {
+            test.equals(true, result);
+            plugin.check_plain_passwd(connection, users[1].uid, users[1].password, function(result) {
+                test.equals(true, result);
+                plugin.check_plain_passwd(connection, users[2].uid, users[2].password, function(result) {
+                    test.equals(true, result);
+                    plugin.check_plain_passwd(connection, users[3].uid, users[3].password, function(result) {
+                        test.equals(true, result);
                         plugin.check_plain_passwd(connection, 'invalid', 'invalid', function(result) {
                             test.equals(false, result);
                             test.done();

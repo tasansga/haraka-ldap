@@ -1,5 +1,6 @@
 'use strict';
 
+var async = require('async');
 var util = require('util');
 
 
@@ -122,6 +123,19 @@ exports.init_authn_ldap = function(next, server) {
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
+    if (Array.isArray(plugin.cfg.main.dn)) {
+        plugin.logerror('Looking up user "' + user + '" by DN.');
+        var search = function(userdn, searchCallback) {
+            var userdn = userdn.replace(/%u/g, user);
+            plugin.logerror(userdn);
+            return plugin._verify_user(userdn, passwd, searchCallback);
+        };
+        var asyncCallback = function(result) {
+            plugin.logerror(result);
+            cb(result !== undefined);
+        };
+        return async.detect(plugin.cfg.main.dn, search, asyncCallback);
+    }
     var callback = function(err, userdn) {
         if (err) {
             plugin.logerror("Could not use LDAP for password check: " + err);
@@ -132,8 +146,9 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
             cb(false);
         }
         else {
-            plugin._verify_user(userdn[0], passwd, cb);
+            return plugin._verify_user(userdn[0], passwd, cb);
         }
     };
+    plugin.logdebug('Looking up user "' + user + '" by search.');
     plugin._get_dn_for_uid(user, callback);
 };

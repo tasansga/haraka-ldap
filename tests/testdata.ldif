@@ -48,7 +48,7 @@ cn: Test User 2
 mailLocalAddress: user2@my-domain.com
 userPassword: {SSHA}j999dNJUvKzt480ky0/A5VvNRqzSS1TA
 
-# add nonuniqe in both dn
+# add nonunique in both dn
 # password is: CZVm3,BLlx
 dn: uid=nonunique,ou=users,dc=my-domain,dc=com
 changetype: add
