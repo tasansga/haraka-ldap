@@ -137,8 +137,9 @@ exports.init_aliases_ldap = function(next, server) {
 exports.aliases = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        plugin.logerror('Invalid call. Given params: ' + util.inspect(params));
-        return next(DENYSOFT);
+        plugin.logerror('Ignoring invalid call. Given params: ' +
+                        util.inspect(params));
+        return next();
     }
     var rcpt = params[0].address();
     var handleAliases = function(err, result) {

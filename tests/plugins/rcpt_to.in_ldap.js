@@ -167,11 +167,11 @@ exports.check_rcpt = {
             address : function(){ return 'user1@my-domain.com'; }
         }]);
     },
-    'denysoft on missing params[0]' : function(test) {
+    'ignore if missing params[0]' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENYSOFT, err);
+            test.equals(undefined, err);
             test.done();
         };
         plugin.check_rcpt(callback, this.connection, []);

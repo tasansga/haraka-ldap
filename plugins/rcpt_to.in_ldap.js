@@ -88,9 +88,9 @@ exports.init_rcpt_to_in_ldap = function(next, server) {
 exports.check_rcpt = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        plugin.logerror('Invalid call. Given connection.transaction:' +
+        plugin.logerror('Ignoring invalid call. Given connection.transaction:' +
                         util.inspect(connection.transaction));
-        return next(DENYSOFT);
+        return next();
     }
     var rcpt   = params[0].address();
     var callback = function(err, result) {

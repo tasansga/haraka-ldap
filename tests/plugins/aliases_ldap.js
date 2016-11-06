@@ -188,20 +188,20 @@ exports.init_aliases_ldap = {
 
 exports.aliases = {
     setUp : _set_up,
-    'DENYSOFT if invalid call / no rcpt' : function(test) {
+    'ignore if invalid call / no rcpt' : function(test) {
         var plugin = this.plugin;
         var connection = this.connection;
         test.expect(3);
         var noParams = function(result) {
-            test.equals(DENYSOFT, result);
+            test.equals(undefined, result);
             plugin.aliases(noRcpt, connection, []);
         };
         var noRcpt = function(result) {
-            test.equals(DENYSOFT, result);
+            test.equals(undefined, result);
             plugin.aliases(noRcptAddress, connection, [ {} ]);
         };
         var noRcptAddress = function(result) {
-            test.equals(DENYSOFT, result);
+            test.equals(undefined, result);
             test.done();
         };
         plugin.aliases(noParams, connection);
