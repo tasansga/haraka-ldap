@@ -5,7 +5,7 @@ var util = require('util');
 
 
 /**
- * ldappool.js
+ * ldap-pool.js
  * This haraka module implements pooling of bound LDAP connections to avoid
  * the necessity to open and bind new connections for every request.
  */
@@ -119,8 +119,8 @@ exports.register = function() {
 
 exports._load_ldappool_ini = function() {
     var plugin = this;
-    plugin.loginfo("loading ldappool.ini");
-    var cfg = plugin.config.get('ldappool.ini', function() {
+    plugin.loginfo("loading ldap-pool.ini");
+    var cfg = plugin.config.get('ldap-pool.ini', function() {
         plugin._load_ldappool_ini();
     });
     if (plugin._pool) {

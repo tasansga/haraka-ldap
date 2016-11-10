@@ -1,6 +1,1 @@
-docs
-config
-!config/auth_ldap_ext.ini
-!config/ldappool.ini
 node_modules
-package.json

@@ -1,0 +1,29 @@
+{
+  "name": "haraka-plugin-ldap-pool",
+  "version": "0.0.2",
+  "description": "The ldap-pool module provides a LDAP client connection pool for other Haraka LDAP modules.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./run_tests"
+  },
+  "keywords": [
+    "haraka",
+    "ldap",
+    "pool"
+  ],
+  "author": {
+    "name": "Ansgar Tasler",
+    "email": "ansgar.tasler@warkdag.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "haraka-test-fixtures": "^1.0.9",
+    "nodeunit": "^0.10.2"
+  },
+  "dependencies": {
+    "ldapjs": "^1.0.1"
+  }
+}
