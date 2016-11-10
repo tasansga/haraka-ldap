@@ -166,7 +166,7 @@ exports._bind_default = {
         this.cfg.bindpw = 'invalid';
         var pool = new this.plugin.LdapPool(this.cfg);
         var tests = function(err, client) {
-            test.equals('InvalidDnSyntaxError: invalid DN', err);
+            test.equals('InvalidDnSyntaxError', err.name);
             test.done();
         };
         pool._bind_default(tests);
