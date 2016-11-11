@@ -50,7 +50,7 @@ exports._get_alias = {
             test.done();
         };
         this.plugin.cfg.main.attribute_is_dn = true;
-        this.plugin._get_alias(this.group.mail, callback);
+        this.plugin._get_alias(this.group.mail, callback, this.connection);
     },
     'ok with forwarding user' : function(test) {
         this.plugin.cfg.main.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
@@ -60,7 +60,7 @@ exports._get_alias = {
             test.equals('user2@my-domain.com', result[0]);
             test.done();
         };
-        this.plugin._get_alias('forwarder@my-domain.com', callback);
+        this.plugin._get_alias('forwarder@my-domain.com', callback, this.connection);
     },
     'empty result with invalid mail' : function(test) {
         test.expect(1);
@@ -68,7 +68,7 @@ exports._get_alias = {
             test.expect(0, result.length);
             test.done();
         };
-        this.plugin._get_alias('invalid@email', callback);
+        this.plugin._get_alias('invalid@email', callback, this.connection);
     }
 };
 
@@ -109,7 +109,7 @@ exports._resolve_dn_to_alias = {
             test.equals(user.mail, result);
             test.done();
         };
-        this.plugin._resolve_dn_to_alias([this.user.dn], callback);
+        this.plugin._resolve_dn_to_alias([this.user.dn], callback, this.connection);
     },
     'ok multiple' : function(test) {
         var plugin = this.plugin;
@@ -122,7 +122,7 @@ exports._resolve_dn_to_alias = {
             test.equals('user2@my-domain.com', result[2]);
             test.done();
         };
-        this.plugin._resolve_dn_to_alias(this.group.member, callback);
+        this.plugin._resolve_dn_to_alias(this.group.member, callback, this.connection);
     },
     'empty array when unknown dn' : function(test) {
         var plugin = this.plugin;
@@ -132,7 +132,7 @@ exports._resolve_dn_to_alias = {
             test.equals(0, result.length);
             test.done();
         };
-        this.plugin._resolve_dn_to_alias(['uid=unknown,dc=wherever,dc=com'], callback);
+        this.plugin._resolve_dn_to_alias(['uid=unknown,dc=wherever,dc=com'], callback, this.connection);
     }
 };
 

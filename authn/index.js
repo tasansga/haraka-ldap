@@ -4,27 +4,19 @@ var async = require('async');
 var util = require('util');
 
 
-/**
- * ldap-authn.js
- * This haraka plugin implements authentication agains LDAP servers,
- * i.e. it checks if the given user credentials are valid in LDAP.
- */
-
-
-exports._verify_user = function (userdn, passwd, cb) {
-    var plugin = this;
+exports._verify_user = function (userdn, passwd, cb, connection) {
     if (!this.pool) {
-        plugin.logerror('Could not verify userdn and password: LDAP Pool not found!');
+        connection.logerror('Could not verify userdn and password: LDAP Pool not found!');
         return cb(false);
     }
     this.pool._create_client(function (err, client) {
         if (err) {
-            plugin.logdebug("Login failed, could not get connection: " + err);
+            connection.logdebug("Login failed, could not get connection: " + err);
             return cb(false);
         }
         client.bind(userdn, passwd, function(err) {
             if (err) {
-                plugin.logdebug("Login failed, could not bind '" + userdn + "': " + err);
+                connection.logdebug("Login failed, could not bind '" + userdn + "': " + err);
                 return cb(false);
             }
             else {
@@ -51,10 +43,10 @@ exports._get_search_conf = function(user) {
     return config;
 };
 
-exports._get_dn_for_uid = function (uid, callback) {
+exports._get_dn_for_uid = function (uid, callback, connection) {
     var plugin = this;
     var onError = function(err) {
-        plugin.logerror('Could not get DN for UID "' + uid + '": ' +  err);
+        connection.logerror('Could not get DN for UID "' + uid + '": ' +  err);
         callback(err);
     };
     if (!this.pool) {
@@ -66,7 +58,7 @@ exports._get_dn_for_uid = function (uid, callback) {
         }
         else {
             var config = plugin._get_search_conf(uid);
-            plugin.logdebug('Getting DN for uid: ' + util.inspect(config));
+            connection.logdebug('Getting DN for uid: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }
@@ -124,10 +116,10 @@ exports.init_ldap_authn = function(next, server) {
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
     if (Array.isArray(plugin.cfg.main.dn)) {
-        plugin.logdebug('Looking up user "' + user + '" by DN.');
+        connection.logdebug('Looking up user "' + user + '" by DN.');
         var search = function(userdn, searchCallback) {
             var userdn = userdn.replace(/%u/g, user);
-            return plugin._verify_user(userdn, passwd, searchCallback);
+            return plugin._verify_user(userdn, passwd, searchCallback, connection);
         };
         var asyncCallback = function(result) {
             cb(result !== undefined && result !== null);
@@ -136,17 +128,17 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
     }
     var callback = function(err, userdn) {
         if (err) {
-            plugin.logerror("Could not use LDAP for password check: " + err);
+            connection.logerror("Could not use LDAP for password check: " + err);
             return cb(false);
         }
         else if (userdn.length !== 1) {
-            plugin.logdebug('None or nonunique LDAP search result for user, access denied');
+            connection.logdebug('None or nonunique LDAP search result for user, access denied');
             cb(false);
         }
         else {
-            return plugin._verify_user(userdn[0], passwd, cb);
+            return plugin._verify_user(userdn[0], passwd, cb, connection);
         }
     };
-    plugin.logdebug('Looking up user "' + user + '" by search.');
-    plugin._get_dn_for_uid(user, callback);
+    connection.logdebug('Looking up user "' + user + '" by search.');
+    plugin._get_dn_for_uid(user, callback, connection);
 };

@@ -37,7 +37,7 @@ exports._verify_address = {
         plugin._verify_address(user.uid, user.mail, function(err, result) {
             test.equals(true, result);
             test.done();
-        });
+        }, this.connection);
     },
     '0 entries' : function(test) {
         test.expect(1);
@@ -45,7 +45,7 @@ exports._verify_address = {
         plugin._verify_address('alien', 'unknown', function(err, result) {
             test.equals(false, result);
             test.done();
-        });
+        }, this.connection);
     },
     '2 entries' : function(test) {
         test.expect(1);
@@ -54,7 +54,7 @@ exports._verify_address = {
         plugin._verify_address('user1', 'who cares', function(err, result) {
             test.equals(true, result);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid search filter' : function(test) {
         test.expect(2);
@@ -65,7 +65,7 @@ exports._verify_address = {
             test.equals('Error: (|(uid=user has unbalanced parentheses', err.toString());
             test.equals(false, result);
             test.done();
-        });
+        }, this.connection);
     },
     'no pool' : function(test) {
         test.expect(2);
@@ -76,7 +76,7 @@ exports._verify_address = {
             test.equals('LDAP Pool not found!', err);
             test.equals(false, userdn);
             test.done();
-        });
+        }, this.connection);
     }
 };
 

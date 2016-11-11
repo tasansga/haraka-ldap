@@ -3,17 +3,10 @@
 var util = require('util');
 
 
-/**
- * ldap-authz.js
- * This haraka plugin implements authorization against LDAP servers,
- * i.e. if the given user is allowed to use the given "FROM" address.
- */
-
-
-exports._verify_address = function (uid, address, callback) {
+exports._verify_address = function (uid, address, callback, connection) {
     var plugin = this;
     var onError = function(err) {
-        plugin.logerror('Could not verify address "' + address + '"  for UID "' + uid + '": ' +  err);
+        connection.logerror('Could not verify address "' + address + '"  for UID "' + uid + '": ' +  err);
         callback(err, false);
     };
     if (!this.pool) {
@@ -25,7 +18,7 @@ exports._verify_address = function (uid, address, callback) {
         }
         else {
             var config = plugin._get_search_conf(uid, address);
-            plugin.logdebug('Verifying address: ' + util.inspect(config));
+            connection.logdebug('Verifying address: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }
@@ -90,16 +83,16 @@ exports.check_authz = function(next, connection, params) {
     var plugin = this;
     if (!connection.notes || !connection.notes.auth_user ||
             !params || !params[0] || !params[0].address) {
-        plugin.logerror('Ignoring invalid call. Given params are ' +
-                        ' connection.notes:' + util.inspect(connection.notes) +
-                        ' and params:' + util.inspect(params));
+        connection.logerror('Ignoring invalid call. Given params are ' +
+                            ' connection.notes:' + util.inspect(connection.notes) +
+                            ' and params:' + util.inspect(params));
         return next();
     }
     var uid = connection.notes.auth_user;
     var address = params[0].address();
     var callback = function(err, verified) {
         if (err) {
-            plugin.logerror('Could not use LDAP to match address to uid: ' + err);
+            connection.logerror('Could not use LDAP to match address to uid: ' + err);
             next(DENYSOFT);
         }
         else if (!verified) {
@@ -109,5 +102,5 @@ exports.check_authz = function(next, connection, params) {
             next();
         }
     };
-    plugin._verify_address(uid, address, callback);
+    plugin._verify_address(uid, address, callback, connection);
 };

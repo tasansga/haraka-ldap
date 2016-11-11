@@ -5,20 +5,13 @@ var util = require('util');
 var Address = require('address-rfc2821').Address;
 
 
-/**
- * ldap-aliases.js
- * This haraka plugin allows to resolve email aliases
- * i.e. to deliver an email to one or multiple recipients on the same server.
- */
-
-
-exports._get_alias = function (address, callback) {
+exports._get_alias = function (address, callback, connection) {
     var plugin = this;
     if (!this.pool) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
-        plugin.logerror('Could not resolve "' + address + '" as alias: ' +  err);
+        connection.logerror('Could not resolve "' + address + '" as alias: ' +  err);
         callback(err, false);
     };
     var search = function (err, client) {
@@ -27,7 +20,7 @@ exports._get_alias = function (address, callback) {
         }
         else {
             var config = plugin._get_search_conf_alias(address);
-            plugin.logdebug('Checking address for alias: ' + util.inspect(config));
+            connection.logdebug('Checking address for alias: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }
@@ -38,7 +31,7 @@ exports._get_alias = function (address, callback) {
                     res.on('error', onError);
                     res.on('end', function() {
                         if (plugin.cfg.main.attribute_is_dn) {
-                            plugin._resolve_dn_to_alias(alias, callback);
+                            plugin._resolve_dn_to_alias(alias, callback, connection);
                         }
                         else {
                             callback(null, alias);
@@ -70,13 +63,13 @@ exports._get_search_conf_alias = function(address) {
     return config;
 };
 
-exports._resolve_dn_to_alias = function(dn, callback) {
+exports._resolve_dn_to_alias = function(dn, callback, connection) {
     var plugin = this;
     if (!this.pool) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
-        plugin.logerror('Could not get address for dn "' + util.inspect(dn) + '": ' +  err);
+        connection.logerror('Could not get address for dn "' + util.inspect(dn) + '": ' +  err);
         callback(err);
     };
     var config = {
@@ -96,7 +89,7 @@ exports._resolve_dn_to_alias = function(dn, callback) {
                     searchCallback(null, arr_addr);
                 });
                 res.on('error', function(e) {
-                    plugin.logwarn('Could not retrieve dn "' + dn + '": ' + e);
+                    connection.logwarn('Could not retrieve dn "' + dn + '": ' + e);
                     searchCallback(null, []);
                 });
             });
@@ -137,18 +130,18 @@ exports.init_ldap_aliases = function(next, server) {
 exports.aliases = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        plugin.logerror('Ignoring invalid call. Given params: ' +
+        connection.logerror('Ignoring invalid call. Given params: ' +
                         util.inspect(params));
         return next();
     }
     var rcpt = params[0].address();
     var handleAliases = function(err, result) {
         if (err) {
-            plugin.logerror('Could not use LDAP to resolve aliases: ' + err);
+            connection.logerror('Could not use LDAP to resolve aliases: ' + err);
             return next(DENYSOFT);
         }
         if (result.length === 0) {
-            plugin.logdebug('No aliases results found for rcpt: ' + rcpt);
+            connection.logdebug('No aliases results found for rcpt: ' + rcpt);
             return next();
         }
         connection.logdebug(plugin, 'Aliasing ' + rcpt + ' to ' + util.inspect(result));
@@ -159,5 +152,5 @@ exports.aliases = function(next, connection, params) {
         }
         next(OK);
     };
-    plugin._get_alias(rcpt, handleAliases);
+    plugin._get_alias(rcpt, handleAliases, connection);
 };

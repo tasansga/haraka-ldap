@@ -64,21 +64,21 @@ exports.verify_user = {
         var users = this.users;
         this.users.forEach(function(user) {
             plugin._verify_user(user.dn, user.password, testUser);
-        });
+        }, this.connection);
     },
     'safety check: wrong password fails' : function(test) {
         test.expect(1);
         this.plugin._verify_user(this.users[0].dn, 'wrong', function(ok) {
             test.equals(false, ok);
             test.done();
-        });
+        }, this.connection);
     },
     'safety check: invalid dn fails' : function(test) {
         test.expect(1);
         this.plugin._verify_user('wrong', 'wrong', function(ok) {
             test.equals(false, ok);
             test.done();
-        });
+        }, this.connection);
     },
     'no pool' : function(test) {
         test.expect(1);
@@ -88,7 +88,7 @@ exports.verify_user = {
         plugin._verify_user(user.dn, user.password, function(result) {
             test.equals(false, result);
             test.done();
-        });
+        }, this.connection);
     }
 };
 
@@ -127,7 +127,7 @@ exports.get_dn_for_uid = {
             test.equals(null, err);
             test.equals(userdn.toString(), user.dn);
             test.done();
-        });
+        }, this.connection);
     },
     'nonunique dn2uid' : function(test) {
         test.expect(2);
@@ -136,7 +136,7 @@ exports.get_dn_for_uid = {
             test.equals(null, err);
             test.equals(2, userdn.length);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid uid' : function(test) {
         test.expect(2);
@@ -145,7 +145,7 @@ exports.get_dn_for_uid = {
             test.equals(null, err);
             test.equals(0, userdn.length);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid search filter' : function(test) {
         test.expect(2);
@@ -156,7 +156,7 @@ exports.get_dn_for_uid = {
             test.equals('Error: (uid=user has unbalanced parentheses', err.toString());
             test.equals(undefined, userdn);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid basedn' : function(test) {
         test.expect(2);
@@ -167,7 +167,7 @@ exports.get_dn_for_uid = {
             test.equals('InvalidDistinguishedNameError', err.name);
             test.equals(undefined, userdn);
             test.done();
-        });
+        }, this.connection);
     },
     'no pool' : function(test) {
         test.expect(2);
@@ -178,7 +178,7 @@ exports.get_dn_for_uid = {
             test.equals('LDAP Pool not found!', err);
             test.equals(undefined, userdn);
             test.done();
-        });
+        }, this.connection);
     }
 };
 

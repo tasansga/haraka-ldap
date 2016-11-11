@@ -3,10 +3,10 @@
 var util = require('util');
 
 
-exports._verify_existence = function (address, callback) {
+exports._verify_existence = function (address, callback, connection) {
     var plugin = this;
     var onError = function(err) {
-        plugin.logerror('Could not verify address "' + address + '": ' +  err);
+        connection.logerror('Could not verify address "' + address + '": ' +  err);
         callback(err, false);
     };
     if (!this.pool) {
@@ -18,7 +18,7 @@ exports._verify_existence = function (address, callback) {
         }
         else {
             var config = plugin._get_search_conf(address);
-            plugin.logdebug('Verifying existence: ' + util.inspect(config));
+            connection.logdebug('Verifying existence: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
                     if (search_error) { onError(search_error); }
@@ -82,14 +82,14 @@ exports.init_ldap_rcpt_to = function(next, server) {
 exports.check_rcpt = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        plugin.logerror('Ignoring invalid call. Given connection.transaction:' +
-                        util.inspect(connection.transaction));
+        connection.logerror('Ignoring invalid call. Given connection.transaction:' +
+                            util.inspect(connection.transaction));
         return next();
     }
     var rcpt   = params[0].address();
     var callback = function(err, result) {
         if (err) {
-            plugin.logerror('Could not use LDAP for address check: ' + err);
+            connection.logerror('Could not use LDAP for address check: ' + err);
             next(DENYSOFT);
         }
         else if (!result) {
@@ -99,5 +99,5 @@ exports.check_rcpt = function(next, connection, params) {
             next(OK);
         }
     };
-    plugin._verify_existence(rcpt, callback);
+    plugin._verify_existence(rcpt, callback, connection);
 };

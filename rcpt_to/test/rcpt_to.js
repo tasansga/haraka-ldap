@@ -36,7 +36,7 @@ exports._verify_existence = {
         plugin._verify_existence(user.mail, function(err, result) {
             test.equals(true, result);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid address' : function(test) {
         test.expect(1);
@@ -44,7 +44,7 @@ exports._verify_existence = {
         plugin._verify_existence('unknown', function(err, result) {
             test.equals(false, result);
             test.done();
-        });
+        }, this.connection);
     },
     'invalid search filter' : function(test) {
         test.expect(2);
@@ -55,7 +55,7 @@ exports._verify_existence = {
             test.equals('Error: (|(mail=user1@my-domain.co has unbalanced parentheses', err.toString());
             test.equals(false, result);
             test.done();
-        });
+        }, this.connection);
     },
     'no pool' : function(test) {
         test.expect(2);
@@ -66,7 +66,7 @@ exports._verify_existence = {
             test.equals('LDAP Pool not found!', err);
             test.equals(false, userdn);
             test.done();
-        });
+        }, this.connection);
     }
 };
 
