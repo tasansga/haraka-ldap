@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-ldap-aliases",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "With ldap-aliases is it possible to query LDAP to resolve email aliases and to forward email to one or multiple configured targets. It utilizes the haraka-plugin-ldap-pool.",
   "main": "index.js",
   "directories": {
