@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-ldap-authn",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "This haraka plugin implements authentication (authn) agains LDAP servers, i.e. it checks if the given user credentials are valid in LDAP. It can either search for the user DN first, or it can try to bind by predefined DN templates and utilizes the haraka-plugin-ldap-pool.",
   "main": "index.js",
   "directories": {

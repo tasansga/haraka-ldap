@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-ldap-authz",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "This haraka plugin implements authorization (authz) against LDAP servers, i.e. if the given user is allowed to use the given FROM address. It utilizes the haraka-plugin-ldap-pool.",
   "main": "index.js",
   "directories": {
