@@ -11,10 +11,12 @@ var _set_up = function (done) {
     };
     this.plugin = new fixtures.plugin('ldap-pool');
     this.cfg = {
-        server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
-        binddn : this.user.dn,
-        bindpw : this.user.password,
-        basedn : 'dc=my-domain,dc=com'
+        main : {
+            server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
+            binddn : this.user.dn,
+            bindpw : this.user.password,
+            basedn : 'dc=my-domain,dc=com'
+        }
     };
     done();
 };
@@ -40,7 +42,7 @@ exports._set_config = {
     'userdef' : function(test) {
         test.expect(8);
         var pool = new this.plugin.LdapPool(this.cfg);
-        var config = pool._set_config({
+        var config = pool._set_config({ main : {
             server : 'testserver',
             timeout : 10000,
             tls_enabled : true,
@@ -49,7 +51,7 @@ exports._set_config = {
             binddn : 'binddn-test',
             bindpw : 'bindpw-test',
             basedn : 'basedn-test'
-        });
+        }});
         test.equals('testserver', config.servers);
         test.equals(10000, config.timeout);
         test.equals(true, config.tls_enabled);
@@ -75,10 +77,10 @@ exports._get_ldapjs_config = {
     },
     'userdef' : function(test) {
         test.expect(3);
-        this.cfg.server = [ 'ldap://127.0.0.1:389' ];
-        this.cfg.timeout = 42;
-        this.cfg.tls_rejectUnauthorized = true;
-        this.cfg.ldap_pool_size = 20;
+        this.cfg.main.server = [ 'ldap://127.0.0.1:389' ];
+        this.cfg.main.timeout = 42;
+        this.cfg.main.tls_rejectUnauthorized = true;
+        this.cfg.main.ldap_pool_size = 20;
         var pool = new this.plugin.LdapPool(this.cfg);
         var config = pool._get_ldapjs_config();
         test.equals('ldap://127.0.0.1:389', config.url);
@@ -108,7 +110,7 @@ exports._create_client = {
     },
     'client with tls' : function (test) {
         test.expect(2);
-        this.cfg.tls_enabled = true;
+        this.cfg.main.tls_enabled = true;
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         var testTls = function(err, client) {
             test.equals(null, err);
@@ -151,8 +153,8 @@ exports._bind_default = {
     },
     'bind with no binddn / bindpw' : function(test) {
         test.expect(1);
-        this.cfg.binddn = undefined;
-        this.cfg.bindpw = undefined;
+        this.cfg.main.binddn = undefined;
+        this.cfg.main.bindpw = undefined;
         var pool = new this.plugin.LdapPool(this.cfg);
         var tests = function(err, client) {
             test.equals(false, client.connected);
@@ -162,8 +164,8 @@ exports._bind_default = {
     },
     'bind with invalid binddn / bindpw' : function(test) {
         test.expect(1);
-        this.cfg.binddn = 'invalid';
-        this.cfg.bindpw = 'invalid';
+        this.cfg.main.binddn = 'invalid';
+        this.cfg.main.bindpw = 'invalid';
         var pool = new this.plugin.LdapPool(this.cfg);
         var tests = function(err, client) {
             test.equals('InvalidDnSyntaxError', err.name);
@@ -233,7 +235,7 @@ exports._load_ldappool_ini = {
         var plugin = this.plugin;
         test.equals(undefined, plugin._tmp_pool_config);
         plugin._load_ldappool_ini();
-        var conf = plugin._tmp_pool_config;
+        var conf = plugin._tmp_pool_config.main;
         test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
         test.equals('ykaHsOzEZD', conf.bindpw);
         test.equals('my-domain.com', conf.basedn);

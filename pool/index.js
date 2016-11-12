@@ -11,15 +11,16 @@ var LdapPool = function(config) {
 
 LdapPool.prototype._set_config = function(config) {
     if (config === undefined) { config = {}; }
+    if (config.main === undefined) { config.main = {}; }
     this.config = {
-        servers : config.server || [ 'ldap://localhost:389' ],
-        timeout : config.timeout,
-        tls_enabled : config.tls_enabled || false,
-        tls_rejectUnauthorized : config.tls_rejectUnauthorized,
-        scope : config.scope || 'sub',
-        binddn : config.binddn,
-        bindpw : config.bindpw,
-        basedn : config.basedn
+        servers : config.main.server || [ 'ldap://localhost:389' ],
+        timeout : config.main.timeout,
+        tls_enabled : config.main.tls_enabled || false,
+        tls_rejectUnauthorized : config.main.tls_rejectUnauthorized,
+        scope : config.main.scope || 'sub',
+        binddn : config.main.binddn,
+        bindpw : config.main.bindpw,
+        basedn : config.main.basedn
     };
     return this.config;
 };
@@ -117,11 +118,11 @@ exports._load_ldappool_ini = function() {
         plugin._load_ldappool_ini();
     });
     if (plugin._pool) {
-        plugin._pool._set_config(cfg.main);
+        plugin._pool._set_config(cfg);
         plugin.logdebug('Current config: ' + util.inspect(plugin._pool.config));
     }
     else {
-        plugin._tmp_pool_config = cfg.main;
+        plugin._tmp_pool_config = cfg;
     }
 };
 
