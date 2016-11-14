@@ -109,14 +109,14 @@ exports.register = function() {
     var plugin = this;
     plugin.register_hook('init_master',  '_init_ldappool');
     plugin.register_hook('init_child',   '_init_ldappool');
-    plugin._load_ldappool_ini();
+    plugin._load_ldap_ini();
 };
 
-exports._load_ldappool_ini = function() {
+exports._load_ldap_ini = function() {
     var plugin = this;
     plugin.loginfo("loading ldap-pool.ini");
     var cfg = plugin.config.get('ldap-pool.ini', function() {
-        plugin._load_ldappool_ini();
+        plugin._load_ldap_ini();
     });
     if (plugin._pool) {
         plugin._pool._set_config(cfg);

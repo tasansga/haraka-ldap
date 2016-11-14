@@ -214,14 +214,14 @@ exports.register = {
     }
 };
 
-exports._load_ldappool_ini = {
+exports._load_ldap_ini = {
     setUp : _set_up,
     'check if values get loaded and set' : function(test) {
         test.expect(4);
         var plugin = this.plugin;
         var server = { notes: { } };
         var next = function() {
-            plugin._load_ldappool_ini();
+            plugin._load_ldap_ini();
             test.equals('uid=user1,ou=users,dc=my-domain,dc=com', server.notes.ldappool.config.binddn);
             test.equals('ykaHsOzEZD', server.notes.ldappool.config.bindpw);
             test.equals('my-domain.com', server.notes.ldappool.config.basedn);
@@ -234,7 +234,7 @@ exports._load_ldappool_ini = {
         test.expect(5);
         var plugin = this.plugin;
         test.equals(undefined, plugin._tmp_pool_config);
-        plugin._load_ldappool_ini();
+        plugin._load_ldap_ini();
         var conf = plugin._tmp_pool_config.main;
         test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
         test.equals('ykaHsOzEZD', conf.bindpw);
@@ -260,7 +260,7 @@ exports._init_ldappool = {
     'test proper _tmp_pool_config handling' : function(test) {
         test.expect(3);
         var plugin = this.plugin;
-        plugin._load_ldappool_ini();
+        plugin._load_ldap_ini();
         var server = { notes: { } };
         var next = function() {
             var conf = plugin._pool.config;

@@ -141,7 +141,7 @@ exports._resolve_dn_to_alias = {
 
 exports.register = {
     setUp : _set_up,
-    'set master and child hooks to gain pool access' : function(test) {
+    'set hook' : function(test) {
         test.expect(3);
         test.equals(false, this.plugin.register_hook.called);
         this.plugin.register();

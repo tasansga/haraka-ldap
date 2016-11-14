@@ -99,7 +99,7 @@ exports._get_search_conf = {
 
 exports.register = {
     setUp : _set_up,
-    'set hooks' : function(test) {
+    'set hook' : function(test) {
         test.expect(3);
         test.equals(false, this.plugin.register_hook.called);
         this.plugin.register();
