@@ -5,15 +5,16 @@ var util = require('util');
 
 
 exports._verify_user = function (userdn, passwd, cb, connection) {
-    if (!this.pool) {
-        connection.logerror('Could not verify userdn and password: LDAP Pool not found!');
-        return cb(false);
+    var pool = connection.server.ldappool;
+    var onError = function(err) {
+        connection.logerror('Could not verify userdn and password: ' + err);
+        cb(false);
+    };
+    if (!pool) {
+        return onError('LDAP Pool not found');
     }
-    this.pool._create_client(function (err, client) {
-        if (err) {
-            connection.logdebug("Login failed, could not get connection: " + err);
-            return cb(false);
-        }
+    pool._create_client(function (err, client) {
+        if (err) { return onError(err); }
         client.bind(userdn, passwd, function(err) {
             if (err) {
                 connection.logdebug("Login failed, could not bind '" + userdn + "': " + err);
@@ -27,14 +28,15 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
     });
 };
 
-exports._get_search_conf = function(user) {
+exports._get_search_conf = function(user, connection) {
     var plugin = this;
-    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(uid=%u))';
+    var pool = connection.server.ldappool;
+    var filter = pool.config.authn.searchfilter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
     var config = {
-        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
+        basedn: pool.config.authn.basedn || pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.main.scope || this.pool.config.scope,
+        scope: pool.config.authn.scope || pool.config.scope,
         attributes: ['dn']
     };
     if (config.basedn === undefined) {
@@ -45,11 +47,12 @@ exports._get_search_conf = function(user) {
 
 exports._get_dn_for_uid = function (uid, callback, connection) {
     var plugin = this;
+    var pool = connection.server.ldappool;
     var onError = function(err) {
         connection.logerror('Could not get DN for UID "' + uid + '": ' +  err);
         callback(err);
     };
-    if (!this.pool) {
+    if (!pool) {
         return onError('LDAP Pool not found!');
     }
     var search = function (err, client) {
@@ -57,7 +60,7 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
             return onError(err);
         }
         else {
-            var config = plugin._get_search_conf(uid);
+            var config = plugin._get_search_conf(uid, connection);
             connection.logdebug('Getting DN for uid: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
@@ -77,7 +80,7 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
             }
         }
     };
-    this.pool.get(search);
+    pool.get(search);
 };
 
 exports.hook_capabilities = function (next, connection) {
@@ -92,30 +95,12 @@ exports.hook_capabilities = function (next, connection) {
 
 exports.register = function() {
     this.inherits('auth/auth_base');
-    var plugin = this;
-    plugin.register_hook('init_master',  'init_ldap_authn');
-    plugin.register_hook('init_child',   'init_ldap_authn');
-    var load_ldap_authn_ini = function() {
-        plugin.loginfo("loading ldap-authn.ini");
-        plugin.cfg = plugin.config.get('ldap-authn.ini', 'ini', load_ldap_authn_ini);
-    };
-    load_ldap_authn_ini();
-};
-
-exports.init_ldap_authn = function(next, server) {
-    var plugin = this;
-    if (!server.notes.ldappool) {
-        plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
-    }
-    else {
-        this.pool = server.notes.ldappool;
-    }
-    next();
 };
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
-    if (Array.isArray(plugin.cfg.main.dn)) {
+    var pool = connection.server.ldappool;
+    if (Array.isArray(pool.config.authn.dn)) {
         connection.logdebug('Looking up user "' + user + '" by DN.');
         var search = function(userdn, searchCallback) {
             var userdn = userdn.replace(/%u/g, user);
@@ -124,7 +109,7 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
         var asyncCallback = function(result) {
             cb(result !== undefined && result !== null);
         };
-        return async.detect(plugin.cfg.main.dn, search, asyncCallback);
+        return async.detect(pool.config.authn.dn, search, asyncCallback);
     }
     var callback = function(err, userdn) {
         if (err) {

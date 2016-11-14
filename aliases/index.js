@@ -7,7 +7,8 @@ var Address = require('address-rfc2821').Address;
 
 exports._get_alias = function (address, callback, connection) {
     var plugin = this;
-    if (!this.pool) {
+    var pool = connection.server.ldappool;
+    if (!pool) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
@@ -19,7 +20,7 @@ exports._get_alias = function (address, callback, connection) {
             return onError(err);
         }
         else {
-            var config = plugin._get_search_conf_alias(address);
+            var config = plugin._get_search_conf_alias(address, connection);
             connection.logdebug('Checking address for alias: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
@@ -30,7 +31,7 @@ exports._get_alias = function (address, callback, connection) {
                     });
                     res.on('error', onError);
                     res.on('end', function() {
-                        if (plugin.cfg.main.attribute_is_dn) {
+                        if (pool.config.aliases.attribute_is_dn) {
                             plugin._resolve_dn_to_alias(alias, callback, connection);
                         }
                         else {
@@ -44,18 +45,19 @@ exports._get_alias = function (address, callback, connection) {
             }
         }
     };
-    this.pool.get(search);
+    pool.get(search);
 };
 
-exports._get_search_conf_alias = function(address) {
+exports._get_search_conf_alias = function(address, connection) {
     var plugin = this;
-    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(mail=%a)(mailForwardAddress=*))';
+    var pool = connection.server.ldappool;
+    var filter = pool.config.aliases.searchfilter || '(&(objectclass=*)(mail=%a)(mailForwardAddress=*))';
     filter = filter.replace(/%a/g, address);
     var config = {
-        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
+        basedn: pool.config.aliases.basedn || pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.main.scope || this.pool.config.scope,
-        attributes: [ plugin.cfg.main.attribute || 'mailForwardingAddress' ]
+        scope: pool.config.aliases.scope || pool.config.scope,
+        attributes: [ pool.config.aliases.attribute || 'mailForwardingAddress' ]
     };
     if (config.basedn === undefined) {
         plugin.logerror('Undefined basedn. Please check your configuration!');
@@ -65,7 +67,8 @@ exports._get_search_conf_alias = function(address) {
 
 exports._resolve_dn_to_alias = function(dn, callback, connection) {
     var plugin = this;
-    if (!this.pool) {
+    var pool = connection.server.ldappool;
+    if (!pool) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
@@ -74,7 +77,7 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
     };
     var config = {
         scope: 'base',
-        attributes: [ plugin.cfg.main.subattribute || 'mail' ]
+        attributes: [ pool.config.aliases.subattribute || 'mail' ]
     };
     var asyncDnSearch = function (err, client) {
         var client = client;
@@ -101,30 +104,11 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
             async.concat(dn, search, callback);
         }
     };
-    this.pool.get(asyncDnSearch);
+    pool.get(asyncDnSearch);
 };
 
 exports.register = function() {
-    var plugin = this;
-    plugin.register_hook('init_master',  'init_ldap_aliases');
-    plugin.register_hook('init_child',   'init_ldap_aliases');
-    var load_ldap_aliases_ini = function() {
-        plugin.loginfo("loading ldap-aliases.ini");
-        plugin.cfg = plugin.config.get('ldap-aliases.ini', 'ini', load_ldap_aliases_ini);
-    };
-    load_ldap_aliases_ini();
-    plugin.register_hook('rcpt', 'aliases');
-};
-
-exports.init_ldap_aliases = function(next, server) {
-    var plugin = this;
-    if (!server.notes.ldappool) {
-        plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
-    }
-    else {
-        this.pool = server.notes.ldappool;
-    }
-    next();
+    this.register_hook('rcpt', 'aliases');
 };
 
 exports.aliases = function(next, connection, params) {

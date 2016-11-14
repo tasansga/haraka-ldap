@@ -34,17 +34,15 @@ var users = [
 var _set_up = function (done) {
     this.users = users;
     this.plugin = new fixtures.plugin('ldap-authn');
-    this.plugin.cfg = { main : {} };
     this.connection = fixtures.connection.createConnection();
-    this.plugin.init_ldap_authn(function(){}, {
-        notes : {
-            ldappool : new ldappool.LdapPool({
-                binddn : this.users[0].dn,
-                bindpw : this.users[0].password,
-                basedn : 'dc=my-domain,dc=com'
-            })
-        }
-    });
+    this.connection.server = {
+        ldappool : new ldappool.LdapPool({
+            binddn : this.users[0].dn,
+            bindpw : this.users[0].password,
+            basedn : 'dc=my-domain,dc=com'
+        })
+    };
+    this.connection.server.ldappool.config.authn = {};
     done();
 };
 
@@ -53,6 +51,7 @@ exports.verify_user = {
     'verify test data' : function(test) {
         test.expect(this.users.length);
         var plugin = this.plugin;
+        var connection = this.connection;
         var counter = 0;
         var testUser = function(result) {
             test.equals(true, result);
@@ -63,8 +62,8 @@ exports.verify_user = {
         };
         var users = this.users;
         this.users.forEach(function(user) {
-            plugin._verify_user(user.dn, user.password, testUser);
-        }, this.connection);
+            plugin._verify_user(user.dn, user.password, testUser, connection);
+        }, connection);
     },
     'safety check: wrong password fails' : function(test) {
         test.expect(1);
@@ -83,12 +82,13 @@ exports.verify_user = {
     'no pool' : function(test) {
         test.expect(1);
         var plugin = this.plugin;
-        plugin.pool = undefined;
+        var connection = this.connection;
+        connection.server.ldappool = undefined;
         var user = this.users[0];
         plugin._verify_user(user.dn, user.password, function(result) {
             test.equals(false, result);
             test.done();
-        }, this.connection);
+        }, connection);
     }
 };
 
@@ -96,19 +96,21 @@ exports._get_search_conf = {
     setUp : _set_up,
     'get defaults' : function(test) {
         test.expect(4);
-        var opts = this.plugin._get_search_conf('testUid');
-        test.equals(opts.basedn, this.plugin.pool.config.basedn);
+        var pool = this.connection.server.ldappool;
+        var opts = this.plugin._get_search_conf('testUid', this.connection);
+        test.equals(opts.basedn, pool.config.basedn);
         test.equals(opts.filter, '(&(objectclass=*)(uid=testUid))');
-        test.equals(opts.scope, this.plugin.pool.config.scope);
+        test.equals(opts.scope, pool.config.scope);
         test.equals(opts.attributes.toString(), ['dn'].toString());
         test.done();
     },
     'get userdef' : function(test) {
-        this.plugin.cfg.main.basedn = 'hop around as you like';
-        this.plugin.cfg.main.searchfilter = '(&(objectclass=posixAccount)(uid=%u))';
-        this.plugin.cfg.main.scope = 'one two three';
+        var pool = this.connection.server.ldappool;
+        pool.config.authn.basedn = 'hop around as you like';
+        pool.config.authn.searchfilter = '(&(objectclass=posixAccount)(uid=%u))';
+        pool.config.authn.scope = 'one two three';
         test.expect(4);
-        var opts = this.plugin._get_search_conf('testUid');
+        var opts = this.plugin._get_search_conf('testUid', this.connection);
         test.equals(opts.basedn, 'hop around as you like');
         test.equals(opts.filter, '(&(objectclass=posixAccount)(uid=testUid))');
         test.equals(opts.scope, 'one two three');
@@ -151,7 +153,8 @@ exports.get_dn_for_uid = {
         test.expect(2);
         var plugin = this.plugin;
         var user = this.users[0];
-        plugin.cfg.main.searchfilter = '(&(objectclass=*)(uid=%u';
+        var pool = this.connection.server.ldappool;
+        pool.config.authn.searchfilter = '(&(objectclass=*)(uid=%u';
         plugin._get_dn_for_uid(user.uid, function (err, userdn) {
             test.equals('Error: (uid=user has unbalanced parentheses', err.toString());
             test.equals(undefined, userdn);
@@ -162,7 +165,7 @@ exports.get_dn_for_uid = {
         test.expect(2);
         var plugin = this.plugin;
         var user = this.users[0];
-        plugin.pool.config.basedn = 'invalid';
+        this.connection.server.ldappool.config.basedn = 'invalid';
         plugin._get_dn_for_uid(user.uid, function (err, userdn) {
             test.equals('InvalidDistinguishedNameError', err.name);
             test.equals(undefined, userdn);
@@ -172,7 +175,7 @@ exports.get_dn_for_uid = {
     'no pool' : function(test) {
         test.expect(2);
         var plugin = this.plugin;
-        plugin.pool = undefined;
+        this.connection.server.ldappool = undefined;
         var user = this.users[0];
         plugin._get_dn_for_uid(user.uid, function (err, userdn) {
             test.equals('LDAP Pool not found!', err);
@@ -209,51 +212,6 @@ exports.hook_capabilities = {
     }
 };
 
-exports.register = {
-    setUp : _set_up,
-    'set master and child hooks to gain pool access' : function(test) {
-        test.expect(5);
-        test.equals(false, this.plugin.register_hook.called);
-        this.plugin.register();
-        test.equals('init_master', this.plugin.register_hook.args[0][0]);
-        test.equals('init_child', this.plugin.register_hook.args[1][0]);
-        test.equals('init_ldap_authn', this.plugin.register_hook.args[0][1]);
-        test.equals('init_ldap_authn', this.plugin.register_hook.args[1][1]);
-        test.done();
-    },
-    'load configuration file' : function(test) {
-        var plugin = this.plugin;
-        test.expect(2);
-        this.plugin.register();
-        test.equals('sub', plugin.cfg.main.scope);
-        test.equals('(&(objectclass=*)(uid=%u))', plugin.cfg.main.searchfilter);
-        test.done();
-    }
-};
-
-exports.init_ldap_authn = {
-    setUp : _set_up,
-    'call next' : function(test) {
-        var plugin = this.plugin;
-        test.expect(1);
-        var callback = function() {
-            test.ok(true);
-            test.done();
-        };
-        plugin.init_ldap_authn(callback, { notes : { ldappool : {} } });
-    },
-    'no pool' : function(test) {
-        var plugin = this.plugin;
-        test.expect(1);
-        plugin.pool = undefined;
-        var callback = function() {
-            test.equals(undefined, plugin.pool);
-            test.done();
-        };
-        plugin.init_ldap_authn(callback, { notes : { } });
-    }
-};
-
 exports.check_plain_passwd = {
     setUp : _set_up,
     'search with test users and invalid user' : function(test) {
@@ -281,9 +239,10 @@ exports.check_plain_passwd = {
     'try dn with test users and invalid user' : function(test) {
         test.expect(5);
         var plugin = this.plugin;
+        var pool = this.connection.server.ldappool;
         var connection = this.connection;
-        plugin.cfg.main.dn = [ 'uid=%u,ou=users,dc=my-domain,dc=com',
-                               'uid=%u,ou=people,dc=my-domain,dc=com' ];
+        pool.config.authn.dn = [ 'uid=%u,ou=users,dc=my-domain,dc=com',
+                                 'uid=%u,ou=people,dc=my-domain,dc=com' ];
         plugin.check_plain_passwd(connection, users[0].uid, users[0].password, function(result) {
             test.equals(true, result);
             plugin.check_plain_passwd(connection, users[1].uid, users[1].password, function(result) {

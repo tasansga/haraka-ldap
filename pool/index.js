@@ -20,7 +20,8 @@ LdapPool.prototype._set_config = function(config) {
         scope : config.main.scope || 'sub',
         binddn : config.main.binddn,
         bindpw : config.main.bindpw,
-        basedn : config.main.basedn
+        basedn : config.main.basedn,
+        aliases : config.aliases
     };
     return this.config;
 };
