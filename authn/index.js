@@ -5,7 +5,7 @@ var util = require('util');
 
 
 exports._verify_user = function (userdn, passwd, cb, connection) {
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     var onError = function(err) {
         connection.logerror('Could not verify userdn and password: ' + err);
         cb(false);
@@ -30,7 +30,7 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
 
 exports._get_search_conf = function(user, connection) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     var filter = pool.config.authn.searchfilter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
     var config = {
@@ -47,7 +47,7 @@ exports._get_search_conf = function(user, connection) {
 
 exports._get_dn_for_uid = function (uid, callback, connection) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     var onError = function(err) {
         connection.logerror('Could not get DN for UID "' + uid + '": ' +  err);
         callback(err);
@@ -99,7 +99,7 @@ exports.register = function() {
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     if (Array.isArray(pool.config.authn.dn)) {
         connection.logdebug('Looking up user "' + user + '" by DN.');
         var search = function(userdn, searchCallback) {

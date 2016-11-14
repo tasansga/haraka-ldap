@@ -5,11 +5,12 @@ var util = require('util');
 
 exports._verify_address = function (uid, address, callback, connection) {
     var plugin = this;
+    var pool = connection.server.notes.ldappool;
     var onError = function(err) {
         connection.logerror('Could not verify address "' + address + '"  for UID "' + uid + '": ' +  err);
         callback(err, false);
     };
-    if (!this.pool) {
+    if (!pool) {
         return onError('LDAP Pool not found!');
     }
     var search = function (err, client) {
@@ -17,7 +18,7 @@ exports._verify_address = function (uid, address, callback, connection) {
             return onError(err);
         }
         else {
-            var config = plugin._get_search_conf(uid, address);
+            var config = plugin._get_search_conf(uid, address, connection);
             connection.logdebug('Verifying address: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
@@ -37,17 +38,18 @@ exports._verify_address = function (uid, address, callback, connection) {
             }
         }
     };
-    this.pool.get(search);
+    pool.get(search);
 };
 
-exports._get_search_conf = function(user, address) {
+exports._get_search_conf = function(user, address, connection) {
     var plugin = this;
-    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(uid=%u)(mail=%a))';
+    var pool = connection.server.notes.ldappool;
+    var filter = pool.config.authz.searchfilter || '(&(objectclass=*)(uid=%u)(mail=%a))';
     filter = filter.replace(/%u/g, user).replace(/%a/g, address);
     var config = {
-        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
+        basedn: pool.config.authz.basedn || pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.main.scope || this.pool.config.scope,
+        scope: pool.config.authz.scope || pool.config.scope,
         attributes: [ 'dn' ]
     };
     if (config.basedn === undefined) {
@@ -58,25 +60,7 @@ exports._get_search_conf = function(user, address) {
 
 exports.register = function() {
     var plugin = this;
-    plugin.register_hook('init_master',  'init_ldap_authz');
-    plugin.register_hook('init_child',   'init_ldap_authz');
-    var load_ldap_authz_ini = function() {
-        plugin.loginfo("loading ldap-authz.ini");
-        plugin.cfg = plugin.config.get('ldap-authz.ini', 'ini', load_ldap_authz_ini);
-    };
-    load_ldap_authz_ini();
     plugin.register_hook('mail', 'check_authz');
-};
-
-exports.init_ldap_authz = function(next, server) {
-    var plugin = this;
-    if (!server.notes.ldappool) {
-        plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
-    }
-    else {
-        this.pool = server.notes.ldappool;
-    }
-    next();
 };
 
 exports.check_authz = function(next, connection, params) {

@@ -23,13 +23,15 @@ var _set_up = function (done) {
     this.connection = fixtures.connection.createConnection();
     this.connection.transaction = {};
     this.connection.server = {
-        ldappool : new ldappool.LdapPool({
-            binddn : this.user.dn,
-            bindpw : this.user.password,
-            basedn : 'dc=my-domain,dc=com'
-        })
+        notes : {
+            ldappool : new ldappool.LdapPool({
+                binddn : this.user.dn,
+                bindpw : this.user.password,
+                basedn : 'dc=my-domain,dc=com'
+            })
+        }
     };
-    this.connection.server.ldappool.config.aliases = {
+    this.connection.server.notes.ldappool.config.aliases = {
         subattribute : 'mailLocalAddress',
         attribute : 'member',
         searchfilter : '(&(objectclass=groupOfNames)(mailLocalAddress=%a))'
@@ -48,12 +50,12 @@ exports._get_alias = {
             test.equals('user2@my-domain.com', result[2]);
             test.done();
         };
-        this.connection.server.ldappool.config.aliases.attribute_is_dn = true;
+        this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
         this.plugin._get_alias(this.group.mail, callback, this.connection);
     },
     'ok with forwarding user' : function(test) {
-        this.connection.server.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
-        this.connection.server.ldappool.config.aliases.attribute = 'mailRoutingAddress';
+        this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
+        this.connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         test.expect(1);
         var callback = function(err, result) {
             test.equals('user2@my-domain.com', result[0]);
@@ -74,7 +76,7 @@ exports._get_alias = {
 exports._get_search_conf_alias = {
     setUp : _set_up,
     'get defaults' : function(test) {
-        var pool = this.connection.server.ldappool;
+        var pool = this.connection.server.notes.ldappool;
         pool.config.aliases.searchfilter = undefined;
         pool.config.aliases.attribute = undefined;
         test.expect(4);
@@ -86,7 +88,7 @@ exports._get_search_conf_alias = {
         test.done();
     },
     'get userdef' : function(test) {
-        var pool = this.connection.server.ldappool;
+        var pool = this.connection.server.notes.ldappool;
         pool.config.aliases.basedn = 'hop around as you like';
         pool.config.aliases.searchfilter = '(&(objectclass=posixAccount)(mail=%a))';
         pool.config.aliases.scope = 'one two three';
@@ -173,7 +175,7 @@ exports.aliases = {
         var plugin = this.plugin;
         var user = this.user;
         test.expect(1);
-        this.connection.server.ldappool.config.aliases.searchfilter = '(&(objectclass=posixAccount)(mail=%a';
+        this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=posixAccount)(mail=%a';
         var callback = function(result) {
             test.equals(DENYSOFT, result);
             test.done();
@@ -198,7 +200,7 @@ exports.aliases = {
         var group = this.group;
         var connection = this.connection;
         connection.transaction = { rcpt_to : [ group.mail ] };
-        this.connection.server.ldappool.config.aliases.attribute_is_dn = true;
+        this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
         var expected = [
             '<user1@my-domain.com>',
             '<user2@my-domain.com>',
@@ -235,8 +237,8 @@ exports.aliases = {
         var plugin = this.plugin;
         var connection = this.connection;
         connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
-        this.connection.server.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
-        this.connection.server.ldappool.config.aliases.attribute = 'mailRoutingAddress';
+        this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
+        this.connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         test.expect(2);
         var next = function(result) {
             test.equals(OK, result);

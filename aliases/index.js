@@ -7,7 +7,7 @@ var Address = require('address-rfc2821').Address;
 
 exports._get_alias = function (address, callback, connection) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     if (!pool) {
         return onError('LDAP Pool not found!');
     }
@@ -50,7 +50,7 @@ exports._get_alias = function (address, callback, connection) {
 
 exports._get_search_conf_alias = function(address, connection) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     var filter = pool.config.aliases.searchfilter || '(&(objectclass=*)(mail=%a)(mailForwardAddress=*))';
     filter = filter.replace(/%a/g, address);
     var config = {
@@ -67,7 +67,7 @@ exports._get_search_conf_alias = function(address, connection) {
 
 exports._resolve_dn_to_alias = function(dn, callback, connection) {
     var plugin = this;
-    var pool = connection.server.ldappool;
+    var pool = connection.server.notes.ldappool;
     if (!pool) {
         return onError('LDAP Pool not found!');
     }
