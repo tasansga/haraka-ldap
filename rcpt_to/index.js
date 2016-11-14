@@ -5,11 +5,12 @@ var util = require('util');
 
 exports._verify_existence = function (address, callback, connection) {
     var plugin = this;
+    var pool = connection.server.notes.ldappool;
     var onError = function(err) {
         connection.logerror('Could not verify address "' + address + '": ' +  err);
         callback(err, false);
     };
-    if (!this.pool) {
+    if (!pool) {
         return onError('LDAP Pool not found!');
     }
     var search = function (err, client) {
@@ -17,7 +18,7 @@ exports._verify_existence = function (address, callback, connection) {
             return onError(err);
         }
         else {
-            var config = plugin._get_search_conf(address);
+            var config = plugin._get_search_conf(address, connection);
             connection.logdebug('Verifying existence: ' + util.inspect(config));
             try {
                 client.search(config.basedn, config, function(search_error, res) {
@@ -37,17 +38,18 @@ exports._verify_existence = function (address, callback, connection) {
             }
         }
     };
-    this.pool.get(search);
+    pool.get(search);
 };
 
-exports._get_search_conf = function(address) {
+exports._get_search_conf = function(address, connection) {
     var plugin = this;
-    var filter = plugin.cfg.main.searchfilter || '(&(objectclass=*)(mail=%a))';
+    var pool = connection.server.notes.ldappool;
+    var filter = pool.config.rcpt_to.searchfilter || '(&(objectclass=*)(mail=%a))';
     filter = filter.replace(/%a/g, address);
     var config = {
-        basedn: plugin.cfg.main.basedn || this.pool.config.basedn,
+        basedn: pool.config.rcpt_to.basedn || pool.config.basedn,
         filter: filter,
-        scope: plugin.cfg.main.scope || this.pool.config.scope,
+        scope: pool.config.rcpt_to.scope || pool.config.scope,
         attributes: [ 'dn' ]
     };
     if (config.basedn === undefined) {
@@ -58,25 +60,7 @@ exports._get_search_conf = function(address) {
 
 exports.register = function() {
     var plugin = this;
-    plugin.register_hook('init_master',  'init_ldap_rcpt_to');
-    plugin.register_hook('init_child',   'init_ldap_rcpt_to');
-    var load_ldap_rcpt_to_ini = function() {
-        plugin.loginfo("loading ldap-rcpt_to.ini");
-        plugin.cfg = plugin.config.get('ldap-rcpt_to.ini', 'ini', load_ldap_rcpt_to_ini);
-    };
-    load_ldap_rcpt_to_ini();
     plugin.register_hook('rcpt', 'check_rcpt');
-};
-
-exports.init_ldap_rcpt_to = function(next, server) {
-    var plugin = this;
-    if (!server.notes.ldappool) {
-        plugin.logerror('LDAP Pool not found! Make sure ldappool plugin is loaded!');
-    }
-    else {
-        this.pool = server.notes.ldappool;
-    }
-    next();
 };
 
 exports.check_rcpt = function(next, connection, params) {

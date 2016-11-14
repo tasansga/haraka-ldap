@@ -13,7 +13,6 @@ var _set_up = function (done) {
         mail : 'user1@my-domain.com'
     };
     this.plugin = new fixtures.plugin('ldap-authz');
-    this.plugin.cfg = { main : { } };
     this.connection = fixtures.connection.createConnection();
     this.connection.server = {
         notes: {
