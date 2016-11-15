@@ -26,7 +26,7 @@ if (process.argv[2]) {
 }
 else {
     reporter.run([
-        'test',
+        'tests',
     ], undefined, function (err) {
         process.exit(((err) ? 1 : 0));
     });

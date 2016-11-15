@@ -1,7 +1,7 @@
 {
-  "name": "haraka-plugin-ldap-rcpt_to",
-  "version": "1.0.0",
-  "description": "This haraka plugin check if a given recipient address exists in LDAP. It utilizes the haraka-plugin-ldap-pool.",
+  "name": "haraka-plugin-ldap",
+  "version": "0.0.1",
+  "description": "",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -12,9 +12,13 @@
   "keywords": [
     "haraka",
     "ldap",
+    "rcpt_to",
     "recipient",
-    "rcpt",
-    "rcpt_to"
+    "aliases",
+    "authn",
+    "authentication",
+    "authz",
+    "authorization"
   ],
   "author": {
     "name": "Ansgar Tasler",
@@ -26,6 +30,8 @@
     "nodeunit": "^0.10.2"
   },
   "dependencies": {
-    "haraka-plugin-ldap-pool": "*"
+    "ldapjs": "^1.0.1",
+    "async": "^2.1.2",
+    "address-rfc2821": "*"
   }
 }
