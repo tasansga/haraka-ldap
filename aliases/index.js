@@ -66,7 +66,6 @@ exports._get_search_conf_alias = function(address, connection) {
 };
 
 exports._resolve_dn_to_alias = function(dn, callback, connection) {
-    var plugin = this;
     var pool = connection.server.notes.ldappool;
     if (!pool) {
         return onError('LDAP Pool not found!');
