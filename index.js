@@ -1,13 +1,22 @@
 'use strict';
 
-var util = require('util');
+var util            = require('util');
 
-exports.LdapPool = require('./pool').LdapPool;
+exports.LdapPool    = require('./pool').LdapPool;
+exports.aliases     = require('./aliases').aliases;
+exports.check_rcpt  = require('./rcpt_to').check_rcpt;
+exports.check_authz = require('./authz').check_authz;
+exports.hook_capabilities = require('./authn').hook_capabilities;
+exports.check_plain_passwd = require('./authn').check_plain_passwd;
 
 exports.register = function() {
+    this.inherits('auth/auth_base');
     var plugin = this;
     plugin.register_hook('init_master',  '_init_ldappool');
     plugin.register_hook('init_child',   '_init_ldappool');
+    plugin.register_hook('rcpt', 'aliases');
+    plugin.register_hook('rcpt', 'check_rcpt');
+    plugin.register_hook('mail', 'check_authz');
     plugin._load_ldap_ini();
 };
 

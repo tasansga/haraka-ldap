@@ -1,7 +1,7 @@
 'use strict';
 
-var fixtures     = require('haraka-test-fixtures');
-var ldappool     = require('haraka-plugin-ldap-pool');
+var fixtures  = require('haraka-test-fixtures');
+var ldappool  = require('../pool');
 
 // test user data as defined in testdata.ldif
 var users = [
@@ -33,14 +33,16 @@ var users = [
 
 var _set_up = function (done) {
     this.users = users;
-    this.plugin = new fixtures.plugin('ldap-authn');
+    this.plugin = require('../authn');
     this.connection = fixtures.connection.createConnection();
     this.connection.server = {
         notes: {
             ldappool : new ldappool.LdapPool({
-                binddn : this.users[0].dn,
-                bindpw : this.users[0].password,
-                basedn : 'dc=my-domain,dc=com'
+                main : {
+                    binddn : this.users[0].dn,
+                    bindpw : this.users[0].password,
+                    basedn : 'dc=my-domain,dc=com'
+                }
             })
         }
     };

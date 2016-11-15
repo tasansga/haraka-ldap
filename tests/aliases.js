@@ -1,7 +1,8 @@
 'use strict';
 
-var fixtures     = require('haraka-test-fixtures');
-var ldappool     = require('haraka-plugin-ldap-pool');
+var fixtures  = require('haraka-test-fixtures');
+var constants = require('haraka-constants');
+var ldappool  = require('../pool');
 
 var _set_up = function (done) {
     this.user = {
@@ -19,15 +20,17 @@ var _set_up = function (done) {
             'uid=nonunique,ou=users,dc=my-domain,dc=com'
         ]
     };
-    this.plugin = new fixtures.plugin('ldap-aliases');
+    this.plugin = require('../aliases');
     this.connection = fixtures.connection.createConnection();
     this.connection.transaction = {};
     this.connection.server = {
         notes : {
             ldappool : new ldappool.LdapPool({
-                binddn : this.user.dn,
-                bindpw : this.user.password,
-                basedn : 'dc=my-domain,dc=com'
+                main : {
+                    binddn : this.user.dn,
+                    bindpw : this.user.password,
+                    basedn : 'dc=my-domain,dc=com'
+                }
             })
         }
     };
@@ -139,18 +142,6 @@ exports._resolve_dn_to_alias = {
     }
 };
 
-exports.register = {
-    setUp : _set_up,
-    'set hook' : function(test) {
-        test.expect(3);
-        test.equals(false, this.plugin.register_hook.called);
-        this.plugin.register();
-        test.equals('rcpt', this.plugin.register_hook.args[0]);
-        test.equals('aliases', this.plugin.register_hook.args[1]);
-        test.done();
-    }
-};
-
 exports.aliases = {
     setUp : _set_up,
     'ignore if invalid call / no rcpt' : function(test) {
@@ -177,7 +168,7 @@ exports.aliases = {
         test.expect(1);
         this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=posixAccount)(mail=%a';
         var callback = function(result) {
-            test.equals(DENYSOFT, result);
+            test.equals(constants.denysoft, result);
             test.done();
         };
         plugin.aliases(callback, this.connection, [ { address : function() {
@@ -209,7 +200,7 @@ exports.aliases = {
         expected.sort();
         test.expect(2);
         var next = function(result) {
-            test.equals(OK, result);
+            test.equals(undefined, result);
             connection.transaction.rcpt_to.sort();
             test.equals(expected.toString(), connection.transaction.rcpt_to.toString());
             test.done();
@@ -241,7 +232,7 @@ exports.aliases = {
         this.connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         test.expect(2);
         var next = function(result) {
-            test.equals(OK, result);
+            test.equals(undefined, result);
             test.equals('<user2@my-domain.com>', connection.transaction.rcpt_to.toString());
             test.done();
         };

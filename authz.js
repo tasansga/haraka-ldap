@@ -1,7 +1,7 @@
 'use strict';
 
-var util = require('util');
-
+var util      = require('util');
+var constants = require('haraka-constants');
 
 exports._verify_address = function (uid, address, callback, connection) {
     var plugin = this;
@@ -42,7 +42,6 @@ exports._verify_address = function (uid, address, callback, connection) {
 };
 
 exports._get_search_conf = function(user, address, connection) {
-    var plugin = this;
     var pool = connection.server.notes.ldappool;
     var filter = pool.config.authz.searchfilter || '(&(objectclass=*)(uid=%u)(mail=%a))';
     filter = filter.replace(/%u/g, user).replace(/%a/g, address);
@@ -52,15 +51,7 @@ exports._get_search_conf = function(user, address, connection) {
         scope: pool.config.authz.scope || pool.config.scope,
         attributes: [ 'dn' ]
     };
-    if (config.basedn === undefined) {
-        plugin.logerror('Undefined basedn. Please check your configuration!');
-    }
     return config;
-};
-
-exports.register = function() {
-    var plugin = this;
-    plugin.register_hook('mail', 'check_authz');
 };
 
 exports.check_authz = function(next, connection, params) {
@@ -77,10 +68,10 @@ exports.check_authz = function(next, connection, params) {
     var callback = function(err, verified) {
         if (err) {
             connection.logerror('Could not use LDAP to match address to uid: ' + err);
-            next(DENYSOFT);
+            next(constants.denysoft);
         }
         else if (!verified) {
-            next(DENY, 'User not allowed to send from this address.');
+            next(constants.deny, 'User not allowed to send from this address.');
         }
         else {
             next();

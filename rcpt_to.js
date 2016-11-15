@@ -1,7 +1,7 @@
 'use strict';
 
-var util = require('util');
-
+var util      = require('util');
+var constants = require('haraka-constants');
 
 exports._verify_existence = function (address, callback, connection) {
     var plugin = this;
@@ -42,7 +42,6 @@ exports._verify_existence = function (address, callback, connection) {
 };
 
 exports._get_search_conf = function(address, connection) {
-    var plugin = this;
     var pool = connection.server.notes.ldappool;
     var filter = pool.config.rcpt_to.searchfilter || '(&(objectclass=*)(mail=%a))';
     filter = filter.replace(/%a/g, address);
@@ -52,15 +51,7 @@ exports._get_search_conf = function(address, connection) {
         scope: pool.config.rcpt_to.scope || pool.config.scope,
         attributes: [ 'dn' ]
     };
-    if (config.basedn === undefined) {
-        plugin.logerror('Undefined basedn. Please check your configuration!');
-    }
     return config;
-};
-
-exports.register = function() {
-    var plugin = this;
-    plugin.register_hook('rcpt', 'check_rcpt');
 };
 
 exports.check_rcpt = function(next, connection, params) {
@@ -74,13 +65,13 @@ exports.check_rcpt = function(next, connection, params) {
     var callback = function(err, result) {
         if (err) {
             connection.logerror('Could not use LDAP for address check: ' + err);
-            next(DENYSOFT);
+            next(constants.denysoft);
         }
         else if (!result) {
-            next(DENY);
+            next(constants.deny);
         }
         else {
-            next(OK);
+            next();
         }
     };
     plugin._verify_existence(rcpt, callback, connection);

@@ -1,8 +1,9 @@
 'use strict';
 
-var fixtures     = require('haraka-test-fixtures');
-var ldappool     = require('haraka-plugin-ldap-pool');
-var Address      = require('address-rfc2821').Address;
+var fixtures  = require('haraka-test-fixtures');
+var Address   = require('address-rfc2821').Address;
+var constants = require('haraka-constants');
+var ldappool  = require('../pool');
 
 
 var _set_up = function (done) {
@@ -12,14 +13,16 @@ var _set_up = function (done) {
         password : 'ykaHsOzEZD',
         mail : 'user1@my-domain.com'
     };
-    this.plugin = new fixtures.plugin('ldap-authz');
+    this.plugin = require('../authz');
     this.connection = fixtures.connection.createConnection();
     this.connection.server = {
         notes: {
             ldappool : new ldappool.LdapPool({
-                binddn : this.user.dn,
-                bindpw : this.user.password,
-                basedn : 'dc=my-domain,dc=com'
+                main : {
+                    binddn : this.user.dn,
+                    bindpw : this.user.password,
+                    basedn : 'dc=my-domain,dc=com'
+                }
             })
         }
     };
@@ -110,18 +113,6 @@ exports._get_search_conf = {
     }
 };
 
-exports.register = {
-    setUp : _set_up,
-    'set mail hook' : function(test) {
-        test.expect(3);
-        test.equals(false, this.plugin.register_hook.called);
-        this.plugin.register();
-        test.equals('mail', this.plugin.register_hook.args[0]);
-        test.equals('check_authz', this.plugin.register_hook.args[1]);
-        test.done();
-    }
-};
-
 exports.check_authz = {
     setUp : _set_up,
     'ok' : function(test) {
@@ -138,7 +129,7 @@ exports.check_authz = {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENY, err);
+            test.equals(constants.deny, err);
             test.done();
         };
         this.connection.notes = { auth_user : 'user1' };
@@ -148,7 +139,7 @@ exports.check_authz = {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENYSOFT, err);
+            test.equals(constants.denysoft, err);
             test.done();
         };
         this.connection.server.notes.ldappool.config.authz.searchfilter =  '(&(objectclass=*)(|(uid=%u';

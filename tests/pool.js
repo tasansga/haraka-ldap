@@ -1,6 +1,6 @@
 'use strict';
 
-var fixtures     = require('haraka-test-fixtures');
+var ldappool  = require('../pool');
 
 var _set_up = function (done) {
     this.user = {
@@ -9,7 +9,6 @@ var _set_up = function (done) {
         password : 'ykaHsOzEZD',
         mail : 'user1@my-domain.com'
     };
-    this.plugin = new fixtures.plugin('ldap-pool');
     this.cfg = {
         main : {
             server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
@@ -25,7 +24,7 @@ exports._set_config = {
     setUp : _set_up,
     'defaults' : function(test) {
         test.expect(9);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var config = pool._set_config();
         test.equals(pool._set_config().toString(),
                     pool._set_config({}).toString());
@@ -41,7 +40,7 @@ exports._set_config = {
     },
     'userdef' : function(test) {
         test.expect(8);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var config = pool._set_config({ main : {
             server : 'testserver',
             timeout : 10000,
@@ -68,7 +67,7 @@ exports._get_ldapjs_config = {
     setUp : _set_up,
     'defaults' : function(test) {
         test.expect(3);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var config = pool._get_ldapjs_config();
         test.equals('ldap://localhost:389', config.url);
         test.equals(undefined, config.timeout);
@@ -81,7 +80,7 @@ exports._get_ldapjs_config = {
         this.cfg.main.timeout = 42;
         this.cfg.main.tls_rejectUnauthorized = true;
         this.cfg.main.ldap_pool_size = 20;
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var config = pool._get_ldapjs_config();
         test.equals('ldap://127.0.0.1:389', config.url);
         test.equals(42, config.timeout);
@@ -94,7 +93,7 @@ exports._create_client = {
     setUp : _set_up,
     'get valid and connected client' : function(test) {
         test.expect(3);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var user = this.user;
         var tests = function (err, client) {
             test.equals(null, err);
@@ -117,7 +116,7 @@ exports._create_client = {
             test.ok(client._starttls.success);
             test.done();
         };
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         pool._create_client(testTls);
     }
 };
@@ -126,7 +125,7 @@ exports.close = {
     setUp : _set_up,
     'test if connections are closed after call' : function(test) {
         test.expect(4);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         test.equals(0, pool.pool['servers'].length);
         var testClose = function(err, client) {
             test.equals(true, client.connected);
@@ -144,7 +143,7 @@ exports._bind_default = {
     setUp : _set_up,
     'bind with given binddn / bindpw' : function(test) {
         test.expect(1);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var tests = function(err, client) {
             test.equals(true, client.connected);
             test.done();
@@ -155,7 +154,7 @@ exports._bind_default = {
         test.expect(1);
         this.cfg.main.binddn = undefined;
         this.cfg.main.bindpw = undefined;
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var tests = function(err, client) {
             test.equals(false, client.connected);
             test.done();
@@ -166,7 +165,7 @@ exports._bind_default = {
         test.expect(1);
         this.cfg.main.binddn = 'invalid';
         this.cfg.main.bindpw = 'invalid';
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         var tests = function(err, client) {
             test.equals('InvalidDnSyntaxError', err.name);
             test.done();
@@ -179,7 +178,7 @@ exports.get = {
     setUp : _set_up,
     'test connection validity and pooling' : function(test) {
         test.expect(9);
-        var pool = new this.plugin.LdapPool(this.cfg);
+        var pool = new ldappool.LdapPool(this.cfg);
         test.equals(0, pool.pool['servers'].length);
         var tests = function(err, client) {
             test.equals(null, err);
@@ -197,96 +196,5 @@ exports.get = {
             });
         };
         pool.get(tests);
-    }
-};
-
-exports.register = {
-    setUp : _set_up,
-    'register sets master and child hooks to register pool' : function(test) {
-        test.expect(5);
-        test.equals(false, this.plugin.register_hook.called);
-        this.plugin.register();
-        test.equals('init_master', this.plugin.register_hook.args[0][0]);
-        test.equals('init_child', this.plugin.register_hook.args[1][0]);
-        test.equals('_init_ldappool', this.plugin.register_hook.args[0][1]);
-        test.equals('_init_ldappool', this.plugin.register_hook.args[1][1]);
-        test.done();
-    }
-};
-
-exports._load_ldap_ini = {
-    setUp : _set_up,
-    'check if values get loaded and set' : function(test) {
-        test.expect(4);
-        var plugin = this.plugin;
-        var server = { notes: { } };
-        var next = function() {
-            plugin._load_ldap_ini();
-            test.equals('uid=user1,ou=users,dc=my-domain,dc=com', server.notes.ldappool.config.binddn);
-            test.equals('ykaHsOzEZD', server.notes.ldappool.config.bindpw);
-            test.equals('my-domain.com', server.notes.ldappool.config.basedn);
-            test.equals('base', server.notes.ldappool.config.scope);
-        };
-        plugin._init_ldappool(next, server);
-        test.done();
-    },
-    'set _tmp_pool_config if pool is not available' : function(test) {
-        test.expect(5);
-        var plugin = this.plugin;
-        test.equals(undefined, plugin._tmp_pool_config);
-        plugin._load_ldap_ini();
-        var conf = plugin._tmp_pool_config.main;
-        test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
-        test.equals('ykaHsOzEZD', conf.bindpw);
-        test.equals('my-domain.com', conf.basedn);
-        test.equals('base', conf.scope);
-        test.done();
-    }
-};
-
-exports._init_ldappool = {
-    setUp : _set_up,
-    'check if server.notes.ldappool is set correctly' : function(test) {
-        test.expect(2);
-        var plugin = this.plugin;
-        var server = { notes: { } };
-        var next = function() {
-            test.equals(true, server.notes.ldappool instanceof plugin.LdapPool);
-            test.equals(true, plugin._pool instanceof plugin.LdapPool);
-            test.done();
-        };
-        plugin._init_ldappool(next, server);
-    },
-    'test proper _tmp_pool_config handling' : function(test) {
-        test.expect(3);
-        var plugin = this.plugin;
-        plugin._load_ldap_ini();
-        var server = { notes: { } };
-        var next = function() {
-            var conf = plugin._pool.config;
-            test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
-            test.equals('ykaHsOzEZD', conf.bindpw);
-            test.equals('my-domain.com', conf.basedn);
-            test.done();
-        };
-        plugin._init_ldappool(next, server);
-    }
-};
-
-exports.shutdown = {
-    setUp : _set_up,
-    'make sure ldappool gets closed' : function(test) {
-        test.expect(1);
-        var plugin = this.plugin;
-        var server = { notes: { } };
-        var next = function() {
-            server.notes.ldappool.get(function(err, client) {
-                plugin.shutdown(function() {
-                    test.equals(true, client.unbound);
-                    test.done();
-                });
-            });
-        };
-        plugin._init_ldappool(next, server);
     }
 };

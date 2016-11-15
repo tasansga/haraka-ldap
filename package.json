@@ -32,6 +32,7 @@
   "dependencies": {
     "ldapjs": "^1.0.1",
     "async": "^2.1.2",
-    "address-rfc2821": "*"
+    "address-rfc2821": "*",
+    "haraka-constants": "*" 
   }
 }

@@ -1,7 +1,8 @@
 'use strict';
 
 var fixtures     = require('haraka-test-fixtures');
-var ldappool     = require('haraka-plugin-ldap-pool');
+var constants    = require('haraka-constants');
+var ldappool     = require('../pool');
 
 var _set_up = function (done) {
     this.user = {
@@ -10,15 +11,17 @@ var _set_up = function (done) {
         password : 'ykaHsOzEZD',
         mail : 'user1@my-domain.com'
     };
-    this.plugin = new fixtures.plugin('ldap-rcpt_to');
+    this.plugin = require('../rcpt_to');
     this.connection = fixtures.connection.createConnection();
     this.connection.transaction = { };
     this.connection.server = {
         notes : {
             ldappool : new ldappool.LdapPool({
-                binddn : this.user.dn,
-                bindpw : this.user.password,
-                basedn : 'dc=my-domain,dc=com'
+                main : {
+                    binddn : this.user.dn,
+                    bindpw : this.user.password,
+                    basedn : 'dc=my-domain,dc=com'
+                }
             })
         }
     };
@@ -97,25 +100,13 @@ exports._get_search_conf = {
     }
 };
 
-exports.register = {
-    setUp : _set_up,
-    'set hook' : function(test) {
-        test.expect(3);
-        test.equals(false, this.plugin.register_hook.called);
-        this.plugin.register();
-        test.equals('rcpt', this.plugin.register_hook.args[0]);
-        test.equals('check_rcpt', this.plugin.register_hook.args[1]);
-        test.done();
-    }
-};
-
 exports.check_rcpt = {
     setUp : _set_up,
     'ok' : function(test) {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(OK, err);
+            test.equals(undefined, err);
             test.done();
         };
         plugin.check_rcpt(callback, this.connection, [{
@@ -126,7 +117,7 @@ exports.check_rcpt = {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENYSOFT, err);
+            test.equals(constants.denysoft, err);
             test.done();
         };
         this.connection.server.notes.ldappool.config.rcpt_to.searchfilter =  '(&(objectclass=*)(|(mail=%a';
@@ -147,7 +138,7 @@ exports.check_rcpt = {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(DENY, err);
+            test.equals(constants.deny, err);
             test.done();
         };
         plugin.check_rcpt(callback, this.connection, [{

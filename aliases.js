@@ -1,9 +1,9 @@
 'use strict';
 
-var async = require('async');
-var util = require('util');
-var Address = require('address-rfc2821').Address;
-
+var async     = require('async');
+var util      = require('util');
+var Address   = require('address-rfc2821').Address;
+var constants = require('haraka-constants');
 
 exports._get_alias = function (address, callback, connection) {
     var plugin = this;
@@ -49,7 +49,6 @@ exports._get_alias = function (address, callback, connection) {
 };
 
 exports._get_search_conf_alias = function(address, connection) {
-    var plugin = this;
     var pool = connection.server.notes.ldappool;
     var filter = pool.config.aliases.searchfilter || '(&(objectclass=*)(mail=%a)(mailForwardAddress=*))';
     filter = filter.replace(/%a/g, address);
@@ -59,9 +58,6 @@ exports._get_search_conf_alias = function(address, connection) {
         scope: pool.config.aliases.scope || pool.config.scope,
         attributes: [ pool.config.aliases.attribute || 'mailForwardingAddress' ]
     };
-    if (config.basedn === undefined) {
-        plugin.logerror('Undefined basedn. Please check your configuration!');
-    }
     return config;
 };
 
@@ -106,10 +102,6 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
     pool.get(asyncDnSearch);
 };
 
-exports.register = function() {
-    this.register_hook('rcpt', 'aliases');
-};
-
 exports.aliases = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
@@ -121,7 +113,7 @@ exports.aliases = function(next, connection, params) {
     var handleAliases = function(err, result) {
         if (err) {
             connection.logerror('Could not use LDAP to resolve aliases: ' + err);
-            return next(DENYSOFT);
+            return next(constants.denysoft);
         }
         if (result.length === 0) {
             connection.logdebug('No aliases results found for rcpt: ' + rcpt);
@@ -133,7 +125,7 @@ exports.aliases = function(next, connection, params) {
             var toAddress = new Address('<' + result[i] + '>');
             connection.transaction.rcpt_to.push(toAddress);
         }
-        next(OK);
+        next();
     };
     plugin._get_alias(rcpt, handleAliases, connection);
 };

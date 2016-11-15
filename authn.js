@@ -3,7 +3,6 @@
 var async = require('async');
 var util = require('util');
 
-
 exports._verify_user = function (userdn, passwd, cb, connection) {
     var pool = connection.server.notes.ldappool;
     var onError = function(err) {
@@ -29,7 +28,6 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
 };
 
 exports._get_search_conf = function(user, connection) {
-    var plugin = this;
     var pool = connection.server.notes.ldappool;
     var filter = pool.config.authn.searchfilter || '(&(objectclass=*)(uid=%u))';
     filter = filter.replace(/%u/g, user);
@@ -39,9 +37,6 @@ exports._get_search_conf = function(user, connection) {
         scope: pool.config.authn.scope || pool.config.scope,
         attributes: ['dn']
     };
-    if (config.basedn === undefined) {
-        plugin.logerror("Undefined basedn. Please check your configuration!");
-    }
     return config;
 };
 
@@ -91,10 +86,6 @@ exports.hook_capabilities = function (next, connection) {
         connection.notes.allowed_auth_methods = methods;
     }
     next();
-};
-
-exports.register = function() {
-    this.inherits('auth/auth_base');
 };
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
