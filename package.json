@@ -27,7 +27,8 @@
   "license": "MIT",
   "devDependencies": {
     "haraka-test-fixtures": "^1.0.9",
-    "nodeunit": "^0.10.2"
+    "nodeunit": "^0.10.2",
+    "btoa": "*"
   },
   "dependencies": {
     "ldapjs": "^1.0.1",

@@ -189,33 +189,6 @@ exports.get_dn_for_uid = {
     }
 };
 
-exports.hook_capabilities = {
-    setUp : _set_up,
-    'no tls no auth' : function(test) {
-        var cb = function (rc, msg) {
-            test.expect(1);
-            test.ok(this.connection.capabilities.length === 0);
-            test.done();
-        }.bind(this);
-        this.connection.using_tls = false;
-        this.connection.capabilities = [];
-        this.plugin.hook_capabilities(cb, this.connection);
-    },
-    'tls ante portas, ready for auth login' : function(test) {
-        var cb = function (rc, msg) {
-            test.expect(4);
-            test.ok(this.connection.notes.allowed_auth_methods.length === 2);
-            test.ok(this.connection.notes.allowed_auth_methods[0] === 'PLAIN');
-            test.ok(this.connection.notes.allowed_auth_methods[1] === 'LOGIN');
-            test.ok(this.connection.capabilities[0] === 'AUTH PLAIN LOGIN');
-            test.done();
-        }.bind(this);
-        this.connection.using_tls = true;
-        this.connection.capabilities = [];
-        this.plugin.hook_capabilities(cb, this.connection);
-    }
-};
-
 exports.check_plain_passwd = {
     setUp : _set_up,
     'search with test users and invalid user' : function(test) {

@@ -1,7 +1,7 @@
 'use strict';
 
 var async = require('async');
-var util = require('util');
+var util  = require('util');
 
 exports._verify_user = function (userdn, passwd, cb, connection) {
     var pool = connection.server.notes.ldappool;
@@ -76,16 +76,6 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
         }
     };
     pool.get(search);
-};
-
-exports.hook_capabilities = function (next, connection) {
-    // Don't offer AUTH capabilities by default unless session is encrypted
-    if (connection.using_tls) {
-        var methods = [ 'PLAIN', 'LOGIN' ];
-        connection.capabilities.push('AUTH ' + methods.join(' '));
-        connection.notes.allowed_auth_methods = methods;
-    }
-    next();
 };
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {

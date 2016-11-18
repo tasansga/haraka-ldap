@@ -1,6 +1,9 @@
 'use strict';
 
 var fixtures     = require('haraka-test-fixtures');
+var constants = require('haraka-constants');
+var btoa      = require('btoa');
+var pool         = require('../pool');
 
 var _set_up = function (done) {
     this.user = {
@@ -10,15 +13,129 @@ var _set_up = function (done) {
         mail : 'user1@my-domain.com'
     };
     this.plugin = new fixtures.plugin('ldap');
+    this.server = { notes: { } };
     this.cfg = {
         main : {
-            server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
             binddn : this.user.dn,
             bindpw : this.user.password,
             basedn : 'dc=my-domain,dc=com'
         }
     };
+    this.connection = fixtures.connection.createConnection();
+    this.connection.server = this.server;
     done();
+};
+
+exports.handle_authn = {
+    setUp : _set_up,
+    'ok with test user and PLAIN' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
+        connection.notes.authenticating=true;
+        connection.notes.auth_method='PLAIN';
+        plugin.auth_plain = function(result) {
+            test.ok(true);
+            test.done();
+        };
+        var params = [ btoa('discard\0' + this.user.uid + '\0' + this.user.password) ];
+        plugin.handle_authn(function() {}, connection, params);
+    },
+    'ok with test user and LOGIN' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
+        connection.notes.authenticating=true;
+        connection.notes.auth_method='LOGIN';
+        plugin.auth_login = function() {
+            test.ok(true);
+            test.done();
+        };
+        var params = [ btoa('discard\0' + this.user.uid + '\0' + this.user.password) ];
+        plugin.handle_authn(function() {}, connection, params);
+    },
+    'ignore without connection.notes.authenticating' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.handle_authn(next, connection, [ '' ]);
+    },
+    'ignore with unknown AUTH' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
+        connection.notes.authenticating=true;
+        connection.notes.auth_method='OPENSESAME';
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.handle_authn(next, connection, [ '' ]);
+    }
+};
+
+exports.hook_capabilities = {
+    setUp : _set_up,
+    'no tls no auth' : function(test) {
+        var cb = function (rc, msg) {
+            test.expect(1);
+            test.ok(this.connection.capabilities.length === 0);
+            test.done();
+        }.bind(this);
+        this.connection.using_tls = false;
+        this.connection.capabilities = [];
+        this.plugin.hook_capabilities(cb, this.connection);
+    },
+    'tls ante portas, ready for auth login' : function(test) {
+        var cb = function (rc, msg) {
+            test.expect(4);
+            test.ok(this.connection.notes.allowed_auth_methods.length === 2);
+            test.ok(this.connection.notes.allowed_auth_methods[0] === 'PLAIN');
+            test.ok(this.connection.notes.allowed_auth_methods[1] === 'LOGIN');
+            test.ok(this.connection.capabilities[0] === 'AUTH PLAIN LOGIN');
+            test.done();
+        }.bind(this);
+        this.connection.using_tls = true;
+        this.connection.capabilities = [];
+        this.plugin.hook_capabilities(cb, this.connection);
+    }
+};
+
+exports.aliases = {
+    setUp : _set_up,
+    'test' : function(test) {
+        // TODO
+        test.expect(1);
+        test.ok(false);
+        test.done();
+    }
+};
+
+exports.check_rcpt = {
+    setUp : _set_up,
+    'test' : function(test) {
+        // TODO
+        test.expect(1);
+        test.ok(false);
+        test.done();
+    }
+};
+
+exports.check_authz = {
+    setUp : _set_up,
+    'test' : function(test) {
+        // TODO
+        test.expect(1);
+        test.ok(false);
+        test.done();
+    }
 };
 
 exports.register = {
@@ -46,7 +163,7 @@ exports._load_ldap_ini = {
     'check if values get loaded and set' : function(test) {
         test.expect(4);
         var plugin = this.plugin;
-        var server = { notes: { } };
+        var server = this.server;
         var next = function() {
             plugin._load_ldap_ini();
             test.equals('uid=user1,ou=users,dc=my-domain,dc=com', server.notes.ldappool.config.binddn);
@@ -73,13 +190,13 @@ exports._load_ldap_ini = {
 
 exports._init_ldappool = {
     setUp : _set_up,
-    'check if server.notes.ldappool is set correctly' : function(test) {
+    'check if this.server.notes.ldappool is set correctly' : function(test) {
         test.expect(2);
         var plugin = this.plugin;
-        var server = { notes: { } };
+        var server = this.server;
         var next = function() {
-            test.equals(true, server.notes.ldappool instanceof plugin.LdapPool);
-            test.equals(true, plugin._pool instanceof plugin.LdapPool);
+            test.equals(true, server.notes.ldappool instanceof pool.LdapPool);
+            test.equals(true, plugin._pool instanceof pool.LdapPool);
             test.done();
         };
         plugin._init_ldappool(next, server);
@@ -88,7 +205,7 @@ exports._init_ldappool = {
         test.expect(3);
         var plugin = this.plugin;
         plugin._load_ldap_ini();
-        var server = { notes: { } };
+        var server = this.server;
         var next = function() {
             var conf = plugin._pool.config;
             test.equals('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
@@ -105,7 +222,7 @@ exports.shutdown = {
     'make sure ldappool gets closed' : function(test) {
         test.expect(1);
         var plugin = this.plugin;
-        var server = { notes: { } };
+        var server = this.server;
         var next = function() {
             server.notes.ldappool.get(function(err, client) {
                 plugin.shutdown(function() {
