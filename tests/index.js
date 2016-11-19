@@ -171,6 +171,16 @@ exports.aliases = {
         plugin.aliases(next, connection, [ { address : function() {
             return 'forwarder@my-domain.com';
         }}]);
+    },
+    'next if ldappool.config.aliases is not set' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.aliases(next, connection, [ ]);
     }
 };
 
@@ -190,6 +200,16 @@ exports.check_rcpt = {
         plugin.check_rcpt(callback, connection, [{
             address : function(){ return 'user1@my-domain.com'; }
         }]);
+    },
+    'next if ldappool.config.rcpt_to is not set' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.check_rcpt(next, connection, [ ]);
     }
 };
 
@@ -207,6 +227,16 @@ exports.check_authz = {
         };
         this.connection.notes = { auth_user : 'user1' };
         plugin.check_authz(callback, this.connection, [new Address('<user1@my-domain.com>')]);
+    },
+    'next if ldappool.config.authz is not set' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.check_authz(next, connection, [ ]);
     }
 };
 

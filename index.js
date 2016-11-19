@@ -48,15 +48,24 @@ exports.check_plain_passwd = function() {
     authn.check_plain_passwd.apply(authn, arguments);
 };
 
-exports.aliases = function() {
+exports.aliases = function(next, connection, params) {
+    if (!connection.server.notes.ldappool.config.aliases) {
+        return next();
+    }
     aliases.aliases.apply(aliases, arguments);
 };
 
-exports.check_rcpt = function() {
+exports.check_rcpt = function(next, connection, params) {
+    if (!connection.server.notes.ldappool.config.rcpt_to) {
+        return next();
+    }
     rcpt_to.check_rcpt.apply(rcpt_to, arguments);
 };
 
-exports.check_authz = function() {
+exports.check_authz = function(next, connection, params) {
+    if (!connection.server.notes.ldappool.config.authz) {
+        return next();
+    }
     authz.check_authz.apply(authz, arguments);
 };
 
