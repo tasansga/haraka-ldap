@@ -19,7 +19,10 @@ LdapPool.prototype._set_config = function(config) {
         binddn : config.main.binddn,
         bindpw : config.main.bindpw,
         basedn : config.main.basedn,
-        aliases : config.aliases
+        aliases : config.aliases,
+        authn : config.authn,
+        authz : config.authz,
+        rcpt_to : config.rcpt_to
     };
     return this.config;
 };
