@@ -7,7 +7,7 @@ exports._verify_address = function (uid, address, callback, connection) {
     var plugin = this;
     var pool = connection.server.notes.ldappool;
     var onError = function(err) {
-        connection.logerror('Could not verify address "' + address + '"  for UID "' + uid + '": ' +  err);
+        connection.logerror('Could not verify address ' + util.inspect(address) + '  for UID ' + util.inspect(uid) + ': ' +  util.inspect(err));
         callback(err, false);
     };
     if (!pool) {
@@ -67,11 +67,11 @@ exports.check_authz = function(next, connection, params) {
     var address = params[0].address();
     var callback = function(err, verified) {
         if (err) {
-            connection.logerror('Could not use LDAP to match address to uid: ' + err);
+            connection.logerror('Could not use LDAP to match address to uid: ' + util.inspect(err));
             next(constants.denysoft);
         }
         else if (!verified) {
-            next(constants.deny, 'User not allowed to send from this address.');
+            next(constants.deny, 'User ' + util.inspect(uid) + ' not allowed to send from address ' + util.inspect(address) + '.');
         }
         else {
             next();

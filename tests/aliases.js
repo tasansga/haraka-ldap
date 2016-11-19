@@ -228,8 +228,8 @@ exports.aliases = {
         var plugin = this.plugin;
         var connection = this.connection;
         connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
-        this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
-        this.connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
+        connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
+        connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         test.expect(2);
         var next = function(result) {
             test.equals(undefined, result);

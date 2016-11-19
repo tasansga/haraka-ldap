@@ -7,7 +7,7 @@ exports._verify_existence = function (address, callback, connection) {
     var plugin = this;
     var pool = connection.server.notes.ldappool;
     var onError = function(err) {
-        connection.logerror('Could not verify address "' + address + '": ' +  err);
+        connection.logerror('Could not verify address ' + util.inspect(address) + ': ' +  util.inspect(err));
         callback(err, false);
     };
     if (!pool) {
@@ -57,14 +57,14 @@ exports._get_search_conf = function(address, connection) {
 exports.check_rcpt = function(next, connection, params) {
     var plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        connection.logerror('Ignoring invalid call. Given connection.transaction:' +
+        connection.logerror('Ignoring invalid call. Given connection.transaction: ' +
                             util.inspect(connection.transaction));
         return next();
     }
     var rcpt   = params[0].address();
     var callback = function(err, result) {
         if (err) {
-            connection.logerror('Could not use LDAP for address check: ' + err);
+            connection.logerror('Could not use LDAP for address check: ' + util.inspect(err));
             next(constants.denysoft);
         }
         else if (!result) {

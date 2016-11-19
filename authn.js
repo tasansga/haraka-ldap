@@ -6,7 +6,7 @@ var util  = require('util');
 exports._verify_user = function (userdn, passwd, cb, connection) {
     var pool = connection.server.notes.ldappool;
     var onError = function(err) {
-        connection.logerror('Could not verify userdn and password: ' + err);
+        connection.logerror('Could not verify userdn and password: ' + util.inspect(err));
         cb(false);
     };
     if (!pool) {
@@ -16,7 +16,7 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
         if (err) { return onError(err); }
         client.bind(userdn, passwd, function(err) {
             if (err) {
-                connection.logdebug("Login failed, could not bind '" + userdn + "': " + err);
+                connection.logdebug('Login failed, could not bind ' + util.inspect(userdn) + ': ' + util.inspect(err));
                 return cb(false);
             }
             else {
@@ -44,7 +44,7 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
     var plugin = this;
     var pool = connection.server.notes.ldappool;
     var onError = function(err) {
-        connection.logerror('Could not get DN for UID "' + uid + '": ' +  err);
+        connection.logerror('Could not get DN for UID ' + util.inspect(uid) + ': ' +  util.inspect(err));
         callback(err);
     };
     if (!pool) {
@@ -82,7 +82,7 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
     var plugin = this;
     var pool = connection.server.notes.ldappool;
     if (Array.isArray(pool.config.authn.dn)) {
-        connection.logdebug('Looking up user "' + user + '" by DN.');
+        connection.logdebug('Looking up user ' + util.inspect(user) + ' by DN.');
         var search = function(userdn, searchCallback) {
             var userdn = userdn.replace(/%u/g, user);
             return plugin._verify_user(userdn, passwd, searchCallback, connection);
@@ -94,17 +94,17 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
     }
     var callback = function(err, userdn) {
         if (err) {
-            connection.logerror("Could not use LDAP for password check: " + err);
+            connection.logerror('Could not use LDAP for password check: ' + util.inspect(err));
             return cb(false);
         }
         else if (userdn.length !== 1) {
-            connection.logdebug('None or nonunique LDAP search result for user, access denied');
+            connection.logdebug('None or nonunique LDAP search result for user ' + util.inspect(user) + ', access denied');
             cb(false);
         }
         else {
             return plugin._verify_user(userdn[0], passwd, cb, connection);
         }
     };
-    connection.logdebug('Looking up user "' + user + '" by search.');
+    connection.logdebug('Looking up user ' + util.inspect(user) + ' by search.');
     plugin._get_dn_for_uid(user, callback, connection);
 };

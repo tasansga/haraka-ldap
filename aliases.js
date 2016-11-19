@@ -12,7 +12,7 @@ exports._get_alias = function (address, callback, connection) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
-        connection.logerror('Could not resolve "' + address + '" as alias: ' +  err);
+        connection.logerror('Could not resolve ' + util.inspect(address) + ' as alias: ' +  util.inspect(err));
         callback(err, false);
     };
     var search = function (err, client) {
@@ -67,7 +67,7 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
-        connection.logerror('Could not get address for dn "' + util.inspect(dn) + '": ' +  err);
+        connection.logerror('Could not get address for dn ' + util.inspect(dn) + ': ' +  util.inspect(err));
         callback(err);
     };
     var config = {
@@ -87,7 +87,7 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
                     searchCallback(null, arr_addr);
                 });
                 res.on('error', function(e) {
-                    connection.logwarn('Could not retrieve dn "' + dn + '": ' + e);
+                    connection.logwarn('Could not retrieve dn ' + util.inspect(dn) + ': ' + util.inspect(e));
                     searchCallback(null, []);
                 });
             });
@@ -112,14 +112,14 @@ exports.aliases = function(next, connection, params) {
     var rcpt = params[0].address();
     var handleAliases = function(err, result) {
         if (err) {
-            connection.logerror('Could not use LDAP to resolve aliases: ' + err);
+            connection.logerror('Could not use LDAP to resolve aliases: ' + util.inspect(err));
             return next(constants.denysoft);
         }
         if (result.length === 0) {
-            connection.logdebug('No aliases results found for rcpt: ' + rcpt);
+            connection.logdebug('No aliases results found for rcpt: ' + util.inspect(rcpt));
             return next();
         }
-        connection.logdebug(plugin, 'Aliasing ' + rcpt + ' to ' + util.inspect(result));
+        connection.logdebug(plugin, 'Aliasing ' + util.inspect(rcpt) + ' to ' + util.inspect(result));
         connection.transaction.rcpt_to.pop();
         for (var i=0; i<result.length; i++) {
             var toAddress = new Address('<' + result[i] + '>');

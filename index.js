@@ -42,7 +42,7 @@ exports.hook_capabilities = function (next, connection) {
 };
 
 exports.check_plain_passwd = function() {
-    authn.handle_auth.apply(authn, arguments);
+    authn.check_plain_passwd.apply(authn, arguments);
 };
 
 exports.aliases = function() {
@@ -50,7 +50,7 @@ exports.aliases = function() {
 };
 
 exports.check_rcpt = function() {
-    rcpt_to.check_rcpt(rcpt_to, arguments);
+    rcpt_to.check_rcpt.apply(rcpt_to, arguments);
 };
 
 exports.check_authz = function() {
@@ -65,7 +65,7 @@ exports.register = function() {
     plugin.register_hook('rcpt', 'aliases');
     plugin.register_hook('rcpt', 'check_rcpt');
     plugin.register_hook('mail', 'check_authz');
-    plugin.register_hook('unrecognized_command', 'handle_authn')
+    plugin.register_hook('unrecognized_command', 'handle_authn');
     plugin._load_ldap_ini();
 };
 

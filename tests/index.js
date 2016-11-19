@@ -1,8 +1,8 @@
 'use strict';
 
 var fixtures     = require('haraka-test-fixtures');
-var constants = require('haraka-constants');
-var btoa      = require('btoa');
+var Address      = require('address-rfc2821').Address;
+var btoa         = require('btoa');
 var pool         = require('../pool');
 
 var _set_up = function (done) {
@@ -22,7 +22,17 @@ var _set_up = function (done) {
         }
     };
     this.connection = fixtures.connection.createConnection();
-    this.connection.server = this.server;
+    this.connection.server = {
+        notes: {
+            ldappool : new pool.LdapPool({
+                main : {
+                    binddn : this.user.dn,
+                    bindpw : this.user.password,
+                    basedn : 'dc=my-domain,dc=com'
+                }
+            })
+        }
+    };
     done();
 };
 
@@ -108,33 +118,81 @@ exports.hook_capabilities = {
     }
 };
 
+exports.check_plain_passwd = {
+    setUp : _set_up,
+    'basic functionality: valid login ok, invalid login fails' : function(test) {
+        test.expect(2);
+        var plugin = this.plugin;
+        var user = this.user;
+        var connection = this.connection;
+        var next = function() {
+            connection.server.notes.ldappool.config.authn = {  };
+            plugin.check_plain_passwd(connection, user.uid, user.password, function(result) {
+                test.equals(true, result);
+                plugin.check_plain_passwd(connection, user.uid, 'invalid', function(result) {
+                    test.equals(false, result);
+                    test.done();
+                });
+            });
+        };
+        plugin._init_ldappool(next, this.server);
+    }
+};
+
 exports.aliases = {
     setUp : _set_up,
-    'test' : function(test) {
-        // TODO
-        test.expect(1);
-        test.ok(false);
-        test.done();
+    'basic functionality: resolve forwarding user' : function(test) {
+        var plugin = this.plugin;
+        var connection = this.connection;
+        connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
+        connection.server.notes.ldappool.config.aliases = {  };
+        connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
+        connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
+        test.expect(2);
+        var next = function(result) {
+            test.equals(undefined, result);
+            test.equals('<user2@my-domain.com>', connection.transaction.rcpt_to.toString());
+            test.done();
+        };
+        plugin.aliases(next, connection, [ { address : function() {
+            return 'forwarder@my-domain.com';
+        }}]);
     }
 };
 
 exports.check_rcpt = {
     setUp : _set_up,
-    'test' : function(test) {
-        // TODO
+    'basic functionality: lookup recipient' : function(test) {
+        var plugin = this.plugin;
+        var connection = this.connection;
+        connection.server.notes.ldappool.config.rcpt_to = {
+            searchfilter : '(&(objectclass=*)(mailLocalAddress=%a))'
+        };
         test.expect(1);
-        test.ok(false);
-        test.done();
+        var callback = function(err) {
+            test.equals(undefined, err);
+            test.done();
+        };
+        plugin.check_rcpt(callback, connection, [{
+            address : function(){ return 'user1@my-domain.com'; }
+        }]);
     }
 };
 
 exports.check_authz = {
     setUp : _set_up,
-    'test' : function(test) {
-        // TODO
+    'basic functionality: matching address' : function(test) {
+        var plugin = this.plugin;
         test.expect(1);
-        test.ok(false);
-        test.done();
+        var callback = function(err) {
+            test.equals(undefined, err);
+            test.done();
+        };
+        this.connection.server.notes.ldappool.config.authz = {
+            searchfilter : '(&(objectclass=*)(uid=%u)(mailLocalAddress=%a))'
+        };
+        this.connection.notes = { auth_user : 'user1' };
+        plugin.check_authz(callback, this.connection, [new Address('<user1@my-domain.com>')]);
     }
 };
 
