@@ -42,6 +42,7 @@ exports.handle_authn = {
         test.expect(1);
         var plugin = this.plugin;
         var connection = this.connection;
+        connection.server.notes.ldappool.config.authn = {};
         connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
         connection.notes.authenticating=true;
         connection.notes.auth_method='PLAIN';
@@ -56,6 +57,7 @@ exports.handle_authn = {
         test.expect(1);
         var plugin = this.plugin;
         var connection = this.connection;
+        connection.server.notes.ldappool.config.authn = {};
         connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
         connection.notes.authenticating=true;
         connection.notes.auth_method='LOGIN';
@@ -70,6 +72,7 @@ exports.handle_authn = {
         test.expect(1);
         var plugin = this.plugin;
         var connection = this.connection;
+        connection.server.notes.ldappool.config.authn = {};
         var next = function() {
             test.ok(true);
             test.done();
@@ -80,9 +83,20 @@ exports.handle_authn = {
         test.expect(1);
         var plugin = this.plugin;
         var connection = this.connection;
+        connection.server.notes.ldappool.config.authn = {};
         connection.notes.allowed_auth_methods = ['PLAIN','LOGIN'];
         connection.notes.authenticating=true;
         connection.notes.auth_method='OPENSESAME';
+        var next = function() {
+            test.ok(true);
+            test.done();
+        };
+        plugin.handle_authn(next, connection, [ '' ]);
+    },
+    'next if ldappool.config.authn is not set' : function(test) {
+        test.expect(1);
+        var plugin = this.plugin;
+        var connection = this.connection;
         var next = function() {
             test.ok(true);
             test.done();

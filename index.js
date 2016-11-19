@@ -14,6 +14,9 @@ var AUTH_METHOD_LOGIN = 'LOGIN';
 exports.handle_authn = function (next, connection, params) {
     // we use this as hook so we can ignore auth calls with disabled auth plugin
     // see: auth/auth_base.js, exports.hook_unrecognized_command
+    if (!connection.server.notes.ldappool.config.authn) {
+        return next();
+    }
     var plugin = this;
     if (params[0].toUpperCase() === AUTH_COMMAND && params[1]) {
         return plugin.select_auth_method(next, connection,
