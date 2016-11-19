@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.js",
   "directories": {
-    "test": "test"
   },
   "scripts": {
-    "test": "./run_tests"
   },
   "keywords": [
     "haraka",
