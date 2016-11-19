@@ -83,8 +83,8 @@ exports.register = function() {
 
 exports._load_ldap_ini = function() {
     var plugin = this;
-    plugin.loginfo("loading ldap-pool.ini");
-    var cfg = plugin.config.get('ldap-pool.ini', function() {
+    plugin.loginfo("loading ldap.ini");
+    var cfg = plugin.config.get('ldap.ini', function() {
         plugin._load_ldap_ini();
     });
     if (plugin._pool) {
