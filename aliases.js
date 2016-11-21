@@ -75,8 +75,7 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
         attributes: [ pool.config.aliases.subattribute || 'mail' ]
     };
     var asyncDnSearch = function (err, client) {
-        var client = client;
-        var search = function(dn, searchCallback) {
+        var search = function(dnShadow, searchCallback) {
             client.search(dn, config, function(search_error, res) {
                 if (search_error) { onError(search_error, dn); }
                 res.on('searchEntry', function(entry) {
@@ -95,9 +94,8 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
         if (err) {
             return onError(err);
         }
-        else {
-            async.concat(dn, search, callback);
-        }
+
+        async.concat(dn, search, callback);
     };
     pool.get(asyncDnSearch);
 };

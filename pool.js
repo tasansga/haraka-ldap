@@ -58,9 +58,9 @@ LdapPool.prototype._create_client = function(next) {
 };
 
 LdapPool.prototype.close = function(next) {
-    if (this.pool['servers'].length > 0) {
-        while (this.pool['servers'].length > 0) {
-            this.pool['servers'].shift().unbind(next);
+    if (this.pool.servers.length > 0) {
+        while (this.pool.servers.length > 0) {
+            this.pool.servers.shift().unbind(next);
         }
     }
     else {
@@ -75,30 +75,28 @@ LdapPool.prototype._bind_default = function(next) {
             if (err) {
                 return next(err);
             }
-            else {
-                client.bind(cfg.binddn, cfg.bindpw, function(err) {
-                    return next(err, client);
-                });
-            }
+            client.bind(cfg.binddn, cfg.bindpw, function (err2) {
+                next(err2, client);
+            });
         };
         this._create_client(_do_bind);
     }
     else {
-        return this._create_client(next);
+        this._create_client(next);
     }
 };
 
 LdapPool.prototype.get = function(next) {
     var pool = this.pool;
-    if (pool['servers'].length >= this.config.servers.length) {
+    if (pool.servers.length >= this.config.servers.length) {
         // shift and push for round-robin
-        var client = pool['servers'].shift();
-        pool['servers'].push(client);
+        var client = pool.servers.shift();
+        pool.servers.push(client);
         return next(null, client);
     }
-    var setClient = function(err, client) {
-        pool['servers'].push(client);
-        return next(err, client);
+    var setClient = function(err, client2) {
+        pool.servers.push(client2);
+        return next(err, client2);
     };
     this._bind_default(setClient);
 };
