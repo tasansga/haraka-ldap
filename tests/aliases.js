@@ -108,7 +108,6 @@ exports._get_search_conf_alias = {
 exports._resolve_dn_to_alias = {
     setUp : _set_up,
     'ok one' : function(test) {
-        var plugin = this.plugin;
         var user = this.user;
         test.expect(1);
         var callback = function(err, result) {
@@ -118,8 +117,6 @@ exports._resolve_dn_to_alias = {
         this.plugin._resolve_dn_to_alias([this.user.dn], callback, this.connection);
     },
     'ok multiple' : function(test) {
-        var plugin = this.plugin;
-        var user = this.user;
         test.expect(3);
         var callback = function(err, result) {
             result.sort();
@@ -131,8 +128,6 @@ exports._resolve_dn_to_alias = {
         this.plugin._resolve_dn_to_alias(this.group.member, callback, this.connection);
     },
     'empty array when unknown dn' : function(test) {
-        var plugin = this.plugin;
-        var user = this.user;
         test.expect(1);
         var callback = function(err, result) {
             test.equals(0, result.length);
