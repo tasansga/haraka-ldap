@@ -1,10 +1,14 @@
 {
   "name": "haraka-plugin-ldap",
   "version": "1.0.0",
-  "description": "",
+  "description": "Haraka plugin for LDAP",
   "main": "index.js",
   "directories": {},
-  "scripts": {},
+  "scripts": {
+    "lint": "grunt eslint:src",
+    "cover": "./node_modules/.bin/istanbul cover ./run_tests",
+    "test": "./run_tests"
+  },
   "keywords": [
     "haraka",
     "ldap",
@@ -22,9 +26,13 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "btoa": "*",
+    "eslint": "^3",
+    "grunt": "^1.0.1",
+    "grunt-eslint": "^19.0.0",
+    "grunt-version-check": "^0.3.6",
     "haraka-test-fixtures": "^1.0.9",
-    "nodeunit": "^0.10.2",
-    "btoa": "*"
+    "nodeunit": "^0.10.2"
   },
   "dependencies": {
     "ldapjs": "^1.0.1",

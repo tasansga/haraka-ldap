@@ -14,15 +14,13 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
     }
     pool._create_client(function (err, client) {
         if (err) { return onError(err); }
-        client.bind(userdn, passwd, function(err) {
-            if (err) {
+        client.bind(userdn, passwd, function (err2) {
+            if (err2) {
                 connection.logdebug('Login failed, could not bind ' + util.inspect(userdn) + ': ' + util.inspect(err));
                 return cb(false);
             }
-            else {
-                client.unbind();
-                return cb(true);
-            }
+            client.unbind();
+            cb(true);
         });
     });
 };
@@ -84,7 +82,7 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
     if (Array.isArray(pool.config.authn.dn)) {
         connection.logdebug('Looking up user ' + util.inspect(user) + ' by DN.');
         var search = function(userdn, searchCallback) {
-            var userdn = userdn.replace(/%u/g, user);
+            userdn = userdn.replace(/%u/g, user);
             return plugin._verify_user(userdn, passwd, searchCallback, connection);
         };
         var asyncCallback = function(result) {
