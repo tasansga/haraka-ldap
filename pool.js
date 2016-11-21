@@ -2,12 +2,12 @@
 
 var ldap = require('ldapjs');
 
-var LdapPool = function(config) {
+var LdapPool = function (config) {
     this._set_config(config);
     this.pool = { 'servers' : [] };
 };
 
-LdapPool.prototype._set_config = function(config) {
+LdapPool.prototype._set_config = function (config) {
     if (config === undefined) { config = {}; }
     if (config.main === undefined) { config.main = {}; }
     this.config = {

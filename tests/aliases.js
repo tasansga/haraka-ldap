@@ -27,6 +27,7 @@ var _set_up = function (done) {
         notes : {
             ldappool : new ldappool.LdapPool({
                 main : {
+                    server : [ 'ldap://localhost:3389' ],
                     binddn : this.user.dn,
                     bindpw : this.user.password,
                     basedn : 'dc=my-domain,dc=com'
