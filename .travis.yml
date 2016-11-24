@@ -9,7 +9,7 @@ addons:
     - ldap-utils
     - slapd
   hosts:
-    - travis.example.com
+      - travis.my-domain.com
 
 before_install:
     # - tests/travis/ldap-setup.sh
