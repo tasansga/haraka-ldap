@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "directories": {},
-  "scripts": {},
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint *.js test/**/*.js",
+    "lintfix": "./node_modules/.bin/eslint --fix *.js test/**/*.js",
+    "test": "./run_tests"
+  },
   "keywords": [
     "haraka",
     "ldap",
@@ -20,11 +24,14 @@
     "name": "Ansgar Tasler",
     "email": "ansgar.tasler@warkdag.com"
   },
+  "repository": "https://github.com/tasansga/haraka-ldap.git",
   "license": "MIT",
   "devDependencies": {
+    "btoa": "*",
+    "eslint": "^4.8.0",
+    "eslint-plugin-haraka": "^1.0.9",
     "haraka-test-fixtures": "^1.0.9",
-    "nodeunit": "^0.10.2",
-    "btoa": "*"
+    "nodeunit": "^0.10.2"
   },
   "dependencies": {
     "ldapjs": "^1.0.1",
