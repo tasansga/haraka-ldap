@@ -2,6 +2,8 @@
 
 This is an universal LDAP plugin for Haraka. It supports aliases, authentication, authorization and recipient lookup. Check it out on [github](https://github.com/tasansga/haraka-ldap) or [npm](https://www.npmjs.com/package/haraka-plugin-ldap).
 
+Join #haraka on freenode IRC if you need help.
+
 
 ## Configuration
 

@@ -67,15 +67,16 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
         return onError('LDAP Pool not found!');
     }
     var onError = function(err) {
-        connection.logerror('Could not get address for dn ' + util.inspect(dn) + ': ' +  util.inspect(err));
+        connection.logerror('Could not get address for DN ' + util.inspect(dn) + ': ' +  util.inspect(err));
         callback(err);
     };
     var config = {
         scope: 'base',
-        attributes: [ pool.config.aliases.subattribute || 'mail' ]
+        attributes: [ pool.config.aliases.subattribute || 'mailLocalAddress' ]
     };
     var asyncDnSearch = function (err, client) {
         var client = client;
+        connection.logdebug('Resolving DN ' + util.inspect(dn) + ' to alias: ' + util.inspect(config));
         var search = function(dn, searchCallback) {
             client.search(dn, config, function(search_error, res) {
                 if (search_error) { onError(search_error, dn); }
@@ -87,7 +88,7 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
                     searchCallback(null, arr_addr);
                 });
                 res.on('error', function(e) {
-                    connection.logwarn('Could not retrieve dn ' + util.inspect(dn) + ': ' + util.inspect(e));
+                    connection.logwarn('Could not retrieve DN ' + util.inspect(dn) + ': ' + util.inspect(e));
                     searchCallback(null, []);
                 });
             });
