@@ -12,7 +12,7 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
     if (!pool) {
         return onError('LDAP Pool not found');
     }
-    pool._create_client(function (err, client) {
+    pool._create_client((err, client) => {
         if (err) return onError(err);
 
         client.bind(userdn, passwd, (err2) => {
@@ -41,40 +41,36 @@ exports._get_search_conf = function (user, connection) {
 exports._get_dn_for_uid = function (uid, callback, connection) {
     const plugin = this;
     const pool = connection.server.notes.ldappool;
-    const onError = function (err) {
+    function onError (err) {
         connection.logerror(`Could not get DN for UID ${  util.inspect(uid)  }: ${   util.inspect(err)}`);
         callback(err);
-    };
+    }
     if (!pool) {
         return onError('LDAP Pool not found!');
     }
-    const search = function (err, client) {
-        if (err) {
-            return onError(err);
-        }
-        else {
-            const config = plugin._get_search_conf(uid, connection);
-            connection.logdebug(`Getting DN for uid: ${  util.inspect(config)}`);
-            try {
-                client.search(config.basedn, config, function (search_error, res) {
-                    if (search_error) { onError(search_error); }
-                    const userdn=[];
-                    res.on('searchEntry', function (entry) {
-                        userdn.push(entry.object.dn);
-                    });
-                    res.on('error', onError);
-                    res.on('end', function () {
-                        callback(null, userdn);
-                    });
+    pool.get((err, client) => {
+        if (err) return onError(err);
+
+        const config = plugin._get_search_conf(uid, connection);
+        connection.logdebug(`Getting DN for uid: ${  util.inspect(config)}`);
+        try {
+            client.search(config.basedn, config, function (search_error, res) {
+                if (search_error) { onError(search_error); }
+                const userdn=[];
+                res.on('searchEntry', function (entry) {
+                    userdn.push(entry.object.dn);
                 });
-            }
-            catch (e) {
-                return onError(e);
-            }
+                res.on('error', onError);
+                res.on('end', function () {
+                    callback(null, userdn);
+                });
+            });
         }
-    };
-    pool.get(search);
-};
+        catch (e) {
+            return onError(e);
+        }
+    })
+}
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     const plugin = this;
