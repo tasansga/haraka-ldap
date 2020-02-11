@@ -13,16 +13,16 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
         return onError('LDAP Pool not found');
     }
     pool._create_client(function (err, client) {
-        if (err) { return onError(err); }
-        client.bind(userdn, passwd, function (err) {
-            if (err) {
+        if (err) return onError(err);
+
+        client.bind(userdn, passwd, (err2) => {
+            if (err2) {
                 connection.logdebug(`Login failed, could not bind ${  util.inspect(userdn)  }: ${  util.inspect(err)}`);
                 return cb(false);
             }
-            else {
-                client.unbind();
-                return cb(true);
-            }
+
+            client.unbind();
+            return cb(true);
         });
     });
 };
@@ -79,12 +79,14 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
     const plugin = this;
     const pool = connection.server.notes.ldappool;
+
+    function search (userdn, searchCallback) {
+        userdn = userdn.replace(/%u/g, user);
+        return plugin._verify_user(userdn, passwd, searchCallback, connection);
+    }
+
     if (Array.isArray(pool.config.authn.dn)) {
         connection.logdebug(`Looking up user ${  util.inspect(user)  } by DN.`);
-        function search (userdn, searchCallback) {
-            userdn = userdn.replace(/%u/g, user);
-            return plugin._verify_user(userdn, passwd, searchCallback, connection);
-        }
         return async.detect(pool.config.authn.dn, search, (result) => {
             cb(result !== undefined && result !== null);
         });

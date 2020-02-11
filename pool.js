@@ -70,18 +70,15 @@ LdapPool.prototype.close = function (next) {
 
 LdapPool.prototype._bind_default = function (next) {
     const cfg = this.config;
+
     if (cfg.binddn !== undefined && cfg.bindpw !== undefined) {
-        const _do_bind = function (err, client) {
-            if (err) {
-                return next(err);
-            }
-            else {
-                client.bind(cfg.binddn, cfg.bindpw, function (err) {
-                    return next(err, client);
-                });
-            }
-        };
-        this._create_client(_do_bind);
+        this._create_client( (err, client) => {
+            if (err) return next(err);
+
+            client.bind(cfg.binddn, cfg.bindpw, function (err2) {
+                return next(err2, client);
+            });
+        });
     }
     else {
         return this._create_client(next);
@@ -96,11 +93,10 @@ LdapPool.prototype.get = function (next) {
         pool.servers.push(client);
         return next(null, client);
     }
-    const setClient = function (err, client) {
+    this._bind_default( (err, client) => {
         pool.servers.push(client);
         return next(err, client);
-    };
-    this._bind_default(setClient);
+    });
 };
 
 exports.LdapPool = LdapPool;

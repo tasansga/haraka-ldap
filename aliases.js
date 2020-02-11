@@ -11,10 +11,10 @@ exports._get_alias = function (address, callback, connection) {
     if (!pool) {
         return onError('LDAP Pool not found!');
     }
-    var onError = function (err) {
+    function onError (err) {
         connection.logerror(`Could not resolve ${  util.inspect(address)  } as alias: ${   util.inspect(err)}`);
         callback(err, false);
-    };
+    }
     const search = function (err, client) {
         if (err) {
             return onError(err);
@@ -66,19 +66,21 @@ exports._resolve_dn_to_alias = function (dn, callback, connection) {
     if (!pool) {
         return onError('LDAP Pool not found!');
     }
-    var onError = function (err) {
+    function onError (err) {
         connection.logerror(`Could not get address for DN ${  util.inspect(dn)  }: ${   util.inspect(err)}`);
         callback(err);
-    };
+    }
     const config = {
         scope: 'base',
         attributes: [ pool.config.aliases.subattribute || 'mailLocalAddress' ]
     };
-    const asyncDnSearch = function (err, client) {
+    pool.get((err, client) => {
+        if (err) return onError(err);
         connection.logdebug(`Resolving DN ${  util.inspect(dn)  } to alias: ${  util.inspect(config)}`);
-        const search = function (dn, searchCallback) {
-            client.search(dn, config, function (search_error, res) {
-                if (search_error) { onError(search_error, dn); }
+
+        async.concat(dn, (dn2, searchCallback) => {
+            client.search(dn2, config, function (search_error, res) {
+                if (search_error) { onError(search_error, dn2); }
                 res.on('searchEntry', function (entry) {
                     let arr_addr = entry.object[config.attributes[0]];
                     if (Array.isArray(arr_addr)) {
@@ -91,15 +93,8 @@ exports._resolve_dn_to_alias = function (dn, callback, connection) {
                     searchCallback(null, []);
                 });
             });
-        };
-        if (err) {
-            return onError(err);
-        }
-        else {
-            async.concat(dn, search, callback);
-        }
-    };
-    pool.get(asyncDnSearch);
+        }, callback);
+    });
 };
 
 exports.aliases = function (next, connection, params) {
