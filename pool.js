@@ -58,15 +58,11 @@ LdapPool.prototype._create_client = function (next) {
 }
 
 LdapPool.prototype.close = function (next) {
-    console.log(this.pool.servers.length);
-    if (this.pool.servers.length > 0) {
-        while (this.pool.servers.length > 0) {
-            this.pool.servers.shift().unbind();
-            if (this.pool.servers.length === 0) next()
-        }
-    }
-    else {
-        next();
+    if (this.pool.servers.length <= 0) return next();
+
+    while (this.pool.servers.length > 0) {
+        this.pool.servers.shift().unbind();
+        if (this.pool.servers.length === 0) next()
     }
 }
 
