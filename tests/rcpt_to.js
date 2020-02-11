@@ -106,7 +106,7 @@ exports.check_rcpt = {
         var plugin = this.plugin;
         test.expect(1);
         var callback = function(err) {
-            test.equals(undefined, err);
+            test.equals(constants.ok, err);
             test.done();
         };
         plugin.check_rcpt(callback, this.connection, [{

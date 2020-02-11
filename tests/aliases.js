@@ -1,6 +1,7 @@
 'use strict';
 
 var fixtures  = require('haraka-test-fixtures');
+var util      = require('util');
 var constants = require('haraka-constants');
 var ldappool  = require('../pool');
 
@@ -66,6 +67,18 @@ exports._get_alias = {
             test.done();
         };
         this.plugin._get_alias('forwarder@my-domain.com', callback, this.connection);
+    },
+    'ok with resolve-by-dn' : function(test) {
+        this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
+        test.expect(1);
+        var callback = function(err, result) {
+            var expected = [ 'user1@my-domain.com', 'user2@my-domain.com', 'nonunique1@my-domain.com' ];
+            expected.sort();
+            result.sort();
+            test.equals(util.inspect(expected), util.inspect(result));
+            test.done();
+        };
+        this.plugin._get_alias('postmaster@my-domain.com', callback, this.connection);
     },
     'empty result with invalid mail' : function(test) {
         test.expect(1);
