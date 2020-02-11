@@ -1,10 +1,14 @@
 {
   "name": "haraka-plugin-ldap",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "LDAP plugin for Haraka",
   "main": "index.js",
   "directories": {},
-  "scripts": {},
+  "scripts": {
+    "lint": "npx eslint *.js test/**/*.js",
+    "lintfix": "npx eslint --fix *.js test/**/*.js",
+    "test": "npx mocha"
+  },
   "keywords": [
     "haraka",
     "ldap",
@@ -20,16 +24,19 @@
     "name": "Ansgar Tasler",
     "email": "ansgar.tasler@warkdag.com"
   },
+  "repository": "https://github.com/tasansga/haraka-ldap.git",
   "license": "MIT",
   "devDependencies": {
-    "haraka-test-fixtures": "^1.0.9",
-    "nodeunit": "^0.10.2",
-    "btoa": "*"
+    "btoa": "*",
+    "eslint": "^4.8.0",
+    "eslint-plugin-haraka": "^1.0.9",
+    "haraka-test-fixtures": "^1.0.9"
   },
   "dependencies": {
-    "ldapjs": "^1.0.1",
-    "async": "^2.1.2",
     "address-rfc2821": "*",
-    "haraka-constants": "*"
+    "async": "^2.1.2",
+    "haraka-constants": "*",
+    "ldapjs": "^1.0.1",
+    "mocha": "*"
   }
 }
