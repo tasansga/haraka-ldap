@@ -7,7 +7,8 @@ exports._verify_address = function (uid, address, callback, connection) {
     const plugin = this;
     const pool = connection.server.notes.ldappool;
     const onError = function (err) {
-        connection.logerror(`Could not verify address ${  util.inspect(address)  }  for UID ${  util.inspect(uid)  }: ${   util.inspect(err)}`);
+        connection.logerror(`Could not verify address ${address}  for UID ${uid}`)
+        connection.logdebug(`${util.inspect(err)}`);
         callback(err, false);
     };
     if (!pool) {
@@ -67,7 +68,7 @@ exports.check_authz = function (next, connection, params) {
     const address = params[0].address();
     const callback = function (err, verified) {
         if (err) {
-            connection.logerror(`Could not use LDAP to match address to uid: ${  util.inspect(err)}`);
+            connection.logerror(`Could not use LDAP to match address to uid: ${err.message}`);
             next(constants.denysoft);
         }
         else if (!verified) {

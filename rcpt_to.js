@@ -7,7 +7,8 @@ exports._verify_existence = function (address, callback, connection) {
     const plugin = this;
     const pool = connection.server.notes.ldappool;
     function onError (err) {
-        connection.logerror(`Could not verify address ${  util.inspect(address)  }: ${   util.inspect(err)}`);
+        connection.logerror(`Could not verify address ${address}`)
+        connection.logdebug(`${util.inspect(err)}`);
         callback(err, false);
     }
     if (!pool) return onError('LDAP Pool not found!');
@@ -57,7 +58,7 @@ exports.check_rcpt = function (next, connection, params) {
     const rcpt = params[0].address();
     plugin._verify_existence(rcpt, (err, result) => {
         if (err) {
-            connection.logerror(`Could not use LDAP for address check: ${  util.inspect(err)}`);
+            connection.logerror(`Could not use LDAP for address check: ${err.message}`);
             next(constants.denysoft);
         }
         else if (!result) {

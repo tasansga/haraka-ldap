@@ -17,7 +17,7 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
 
         client.bind(userdn, passwd, (err2) => {
             if (err2) {
-                connection.logdebug(`Login failed, could not bind ${  util.inspect(userdn)  }: ${  util.inspect(err)}`);
+                connection.logdebug(`Login failed, could not bind ${ util.inspect(userdn) }: ${ util.inspect(err)}`);
                 return cb(false);
             }
 
@@ -42,7 +42,8 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
     const plugin = this;
     const pool = connection.server.notes.ldappool;
     function onError (err) {
-        connection.logerror(`Could not get DN for UID ${  util.inspect(uid)  }: ${   util.inspect(err)}`);
+        connection.logerror(`Could not get DN for UID ${uid}`)
+        connection.logdebug(`: ${util.inspect(err)}`);
         callback(err);
     }
     if (!pool) {

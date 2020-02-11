@@ -12,7 +12,8 @@ exports._get_alias = function (address, callback, connection) {
         return onError('LDAP Pool not found!');
     }
     function onError (err) {
-        connection.logerror(`Could not resolve ${  util.inspect(address)  } as alias: ${   util.inspect(err)}`);
+        connection.logerror(`Could not resolve ${address} as alias`)
+        connection.logdebug(`${util.inspect(err)}`);
         callback(err, false);
     }
     const search = function (err, client) {
@@ -89,7 +90,8 @@ exports._resolve_dn_to_alias = function (dn, callback, connection) {
                     searchCallback(null, arr_addr);
                 });
                 res.on('error', function (e) {
-                    connection.logwarn(`Could not retrieve DN ${  util.inspect(dn)  }: ${  util.inspect(e)}`);
+                    connection.logwarn(`Could not retrieve DN ${  util.inspect(dn)  }`);
+                    connection.logdebug(`${util.inspect(e)}`);
                     searchCallback(null, []);
                 });
             });
@@ -100,14 +102,13 @@ exports._resolve_dn_to_alias = function (dn, callback, connection) {
 exports.aliases = function (next, connection, params) {
     const plugin = this;
     if (!params || !params[0] || !params[0].address) {
-        connection.logerror(`Ignoring invalid call. Given params: ${
-            util.inspect(params)}`);
+        connection.logerror(`Ignoring invalid call. Given params: ${util.inspect(params)}`);
         return next();
     }
     const rcpt = params[0].address();
     const handleAliases = function (err, result) {
         if (err) {
-            connection.logerror(`Could not use LDAP to resolve aliases: ${  util.inspect(err)}`);
+            connection.logerror(`Could not use LDAP to resolve aliases: ${err.message}`);
             return next(constants.denysoft);
         }
         if (result.length === 0) {
