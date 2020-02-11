@@ -79,7 +79,7 @@ LdapPool.prototype._bind_default = function (next) {
         });
     }
     else {
-        this._create_client(next);
+        return this._create_client(next);
     }
 }
 
