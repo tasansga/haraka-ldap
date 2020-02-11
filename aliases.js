@@ -75,9 +75,8 @@ exports._resolve_dn_to_alias = function(dn, callback, connection) {
         attributes: [ pool.config.aliases.subattribute || 'mailLocalAddress' ]
     };
     var asyncDnSearch = function (err, client) {
-        var client = client;
         connection.logdebug('Resolving DN ' + util.inspect(dn) + ' to alias: ' + util.inspect(config));
-        var search = function(dn, searchCallback) {
+        const search = function(dn, searchCallback) {
             client.search(dn, config, function(search_error, res) {
                 if (search_error) { onError(search_error, dn); }
                 res.on('searchEntry', function(entry) {
