@@ -1,13 +1,13 @@
 'use strict';
 
-var ldap = require('ldapjs');
+const ldap = require('ldapjs');
 
-var LdapPool = function(config) {
+const LdapPool = function (config) {
     this._set_config(config);
     this.pool = { 'servers' : [] };
 };
 
-LdapPool.prototype._set_config = function(config) {
+LdapPool.prototype._set_config = function (config) {
     if (config === undefined) { config = {}; }
     if (config.main === undefined) { config.main = {}; }
     this.config = {
@@ -27,8 +27,8 @@ LdapPool.prototype._set_config = function(config) {
     return this.config;
 };
 
-LdapPool.prototype._get_ldapjs_config = function() {
-    var config = { // see: http://ldapjs.org/client.html
+LdapPool.prototype._get_ldapjs_config = function () {
+    const config = { // see: http://ldapjs.org/client.html
         url: this.config.servers.shift(),
         timeout: this.config.timeout
     };
@@ -41,9 +41,9 @@ LdapPool.prototype._get_ldapjs_config = function() {
     return config;
 };
 
-LdapPool.prototype._create_client = function(next) {
-    var client = ldap.createClient(this._get_ldapjs_config());
-    var starttls = function(err) {
+LdapPool.prototype._create_client = function (next) {
+    const client = ldap.createClient(this._get_ldapjs_config());
+    const starttls = function (err) {
         if (err) {
             return next(err);
         }
@@ -57,10 +57,10 @@ LdapPool.prototype._create_client = function(next) {
     }
 };
 
-LdapPool.prototype.close = function(next) {
-    if (this.pool['servers'].length > 0) {
-        while (this.pool['servers'].length > 0) {
-            this.pool['servers'].shift().unbind(next);
+LdapPool.prototype.close = function (next) {
+    if (this.pool.servers.length > 0) {
+        while (this.pool.servers.length > 0) {
+            this.pool.servers.shift().unbind(next);
         }
     }
     else {
@@ -68,15 +68,15 @@ LdapPool.prototype.close = function(next) {
     }
 };
 
-LdapPool.prototype._bind_default = function(next) {
-    var cfg = this.config;
+LdapPool.prototype._bind_default = function (next) {
+    const cfg = this.config;
     if (cfg.binddn !== undefined && cfg.bindpw !== undefined) {
-        var _do_bind = function(err, client) {
+        const _do_bind = function (err, client) {
             if (err) {
                 return next(err);
             }
             else {
-                client.bind(cfg.binddn, cfg.bindpw, function(err) {
+                client.bind(cfg.binddn, cfg.bindpw, function (err) {
                     return next(err, client);
                 });
             }
@@ -88,16 +88,16 @@ LdapPool.prototype._bind_default = function(next) {
     }
 };
 
-LdapPool.prototype.get = function(next) {
-    var pool = this.pool;
-    if (pool['servers'].length >= this.config.servers.length) {
+LdapPool.prototype.get = function (next) {
+    const pool = this.pool;
+    if (pool.servers.length >= this.config.servers.length) {
         // shift and push for round-robin
-        var client = pool['servers'].shift();
-        pool['servers'].push(client);
+        const client = pool.servers.shift();
+        pool.servers.push(client);
         return next(null, client);
     }
-    var setClient = function(err, client) {
-        pool['servers'].push(client);
+    const setClient = function (err, client) {
+        pool.servers.push(client);
         return next(err, client);
     };
     this._bind_default(setClient);
