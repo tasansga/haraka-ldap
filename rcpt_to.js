@@ -71,7 +71,7 @@ exports.check_rcpt = function(next, connection, params) {
             next(constants.deny);
         }
         else {
-            next();
+            next(constants.ok);
         }
     };
     plugin._verify_existence(rcpt, callback, connection);

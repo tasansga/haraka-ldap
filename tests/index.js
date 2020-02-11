@@ -3,6 +3,7 @@
 var fixtures     = require('haraka-test-fixtures');
 var Address      = require('address-rfc2821').Address;
 var btoa         = require('btoa');
+var constants    = require('haraka-constants');
 var pool         = require('../pool');
 
 var _set_up = function (done) {
@@ -194,7 +195,7 @@ exports.check_rcpt = {
         };
         test.expect(1);
         var callback = function(err) {
-            test.equals(undefined, err);
+            test.equals(constants.ok, err);
             test.done();
         };
         plugin.check_rcpt(callback, connection, [{
