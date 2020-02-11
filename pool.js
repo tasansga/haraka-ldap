@@ -25,7 +25,7 @@ LdapPool.prototype._set_config = function (config) {
         rcpt_to : config.rcpt_to
     };
     return this.config;
-};
+}
 
 LdapPool.prototype._get_ldapjs_config = function () {
     const config = { // see: http://ldapjs.org/client.html
@@ -39,7 +39,7 @@ LdapPool.prototype._get_ldapjs_config = function () {
         };
     }
     return config;
-};
+}
 
 LdapPool.prototype._create_client = function (next) {
     const client = ldap.createClient(this._get_ldapjs_config());
@@ -55,18 +55,20 @@ LdapPool.prototype._create_client = function (next) {
     else {
         return next(null, client);
     }
-};
+}
 
 LdapPool.prototype.close = function (next) {
+    console.log(this.pool.servers.length);
     if (this.pool.servers.length > 0) {
         while (this.pool.servers.length > 0) {
-            this.pool.servers.shift().unbind(next);
+            this.pool.servers.shift().unbind();
+            if (this.pool.servers.length === 0) next()
         }
     }
     else {
         next();
     }
-};
+}
 
 LdapPool.prototype._bind_default = function (next) {
     const cfg = this.config;

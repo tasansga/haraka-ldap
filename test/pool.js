@@ -1,8 +1,10 @@
 'use strict';
 
-var ldappool  = require('../pool');
+const assert = require('assert')
 
-var _set_up = function (done) {
+const ldappool  = require('../pool');
+
+function _set_up (done) {
     this.user = {
         uid : 'user1',
         dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
@@ -11,37 +13,36 @@ var _set_up = function (done) {
     };
     this.cfg = {
         main : {
-            server : [ 'ldap://localhost:389', 'ldaps://localhost:636' ],
+            server : [ 'ldap://localhost:3389', 'ldaps://localhost:3636' ],
             binddn : this.user.dn,
             bindpw : this.user.password,
             basedn : 'dc=my-domain,dc=com'
         }
     };
     done();
-};
+}
 
-exports._set_config = {
-    setUp : _set_up,
-    'defaults' : function(test) {
-        test.expect(9);
-        var pool = new ldappool.LdapPool(this.cfg);
-        var config = pool._set_config();
-        test.equals(pool._set_config().toString(),
-                    pool._set_config({}).toString());
-        test.equals(['ldap://localhost:389'].toString(), config.servers.toString());
-        test.equals(undefined, config.timeout);
-        test.equals(false, config.tls_enabled);
-        test.equals(undefined, config.tls_rejectUnauthorized);
-        test.equals('sub', config.scope);
-        test.equals(undefined, config.binddn);
-        test.equals(undefined, config.bindpw);
-        test.equals(undefined, config.basedn);
-        test.done();
-    },
-    'userdef' : function(test) {
-        test.expect(8);
-        var pool = new ldappool.LdapPool(this.cfg);
-        var config = pool._set_config({ main : {
+describe('_set_config', function () {
+    beforeEach(_set_up);
+
+    it('defaults', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        const config = pool._set_config();
+        assert.equal(pool._set_config().toString(), pool._set_config({}).toString());
+        assert.equal(['ldap://localhost:389'].toString(), config.servers.toString());
+        assert.equal(undefined, config.timeout);
+        assert.equal(false, config.tls_enabled);
+        assert.equal(undefined, config.tls_rejectUnauthorized);
+        assert.equal('sub', config.scope);
+        assert.equal(undefined, config.binddn);
+        assert.equal(undefined, config.bindpw);
+        assert.equal(undefined, config.basedn);
+        done();
+    })
+
+    it('userdef', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        const config = pool._set_config({ main : {
             server : 'testserver',
             timeout : 10000,
             tls_enabled : true,
@@ -51,150 +52,142 @@ exports._set_config = {
             bindpw : 'bindpw-test',
             basedn : 'basedn-test'
         }});
-        test.equals('testserver', config.servers);
-        test.equals(10000, config.timeout);
-        test.equals(true, config.tls_enabled);
-        test.equals(true, config.tls_rejectUnauthorized);
-        test.equals('one', config.scope);
-        test.equals('binddn-test', config.binddn);
-        test.equals('bindpw-test', config.bindpw);
-        test.equals('basedn-test', config.basedn);
-        test.done();
-    }
-};
+        assert.equal('testserver', config.servers);
+        assert.equal(10000, config.timeout);
+        assert.equal(true, config.tls_enabled);
+        assert.equal(true, config.tls_rejectUnauthorized);
+        assert.equal('one', config.scope);
+        assert.equal('binddn-test', config.binddn);
+        assert.equal('bindpw-test', config.bindpw);
+        assert.equal('basedn-test', config.basedn);
+        done();
+    })
+})
 
-exports._get_ldapjs_config = {
-    setUp : _set_up,
-    'defaults' : function(test) {
-        test.expect(3);
-        var pool = new ldappool.LdapPool(this.cfg);
-        var config = pool._get_ldapjs_config();
-        test.equals('ldap://localhost:389', config.url);
-        test.equals(undefined, config.timeout);
-        test.equals(undefined, config.tlsOptions);
-        test.done();
-    },
-    'userdef' : function(test) {
-        test.expect(3);
-        this.cfg.main.server = [ 'ldap://127.0.0.1:389' ];
+describe('_get_ldapjs_config', function () {
+    beforeEach(_set_up);
+    it('defaults', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        const config = pool._get_ldapjs_config();
+        assert.equal('ldap://localhost:3389', config.url);
+        assert.equal(undefined, config.timeout);
+        assert.equal(undefined, config.tlsOptions);
+        done();
+    })
+    it('userdef', function (done) {
+        this.cfg.main.server = [ 'ldap://127.0.0.1:3389' ];
         this.cfg.main.timeout = 42;
         this.cfg.main.tls_rejectUnauthorized = true;
         this.cfg.main.ldap_pool_size = 20;
-        var pool = new ldappool.LdapPool(this.cfg);
-        var config = pool._get_ldapjs_config();
-        test.equals('ldap://127.0.0.1:389', config.url);
-        test.equals(42, config.timeout);
-        test.equals(true, config.tlsOptions.rejectUnauthorized);
-        test.done();
-    }
-};
+        const pool = new ldappool.LdapPool(this.cfg);
+        const config = pool._get_ldapjs_config();
+        assert.equal('ldap://127.0.0.1:3389', config.url);
+        assert.equal(42, config.timeout);
+        assert.equal(true, config.tlsOptions.rejectUnauthorized);
+        done();
+    })
+})
 
-exports._create_client = {
-    setUp : _set_up,
-    'get valid and connected client' : function(test) {
-        test.expect(3);
-        var pool = new ldappool.LdapPool(this.cfg);
-        var user = this.user;
-        var tests = function (err, client) {
-            test.equals(null, err);
-            test.equals(undefined, client._starttls);
-            client.bind(user.dn, user.password, function(err) {
-                if (!err) {
-                    test.ok(true);
-                }
-                test.done();
+describe('_create_client', function () {
+
+    beforeEach(_set_up);
+
+    it('get valid and connected client', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        const user = this.user;
+        pool._create_client(function (err, client) {
+            assert.ifError(err);
+            assert.equal(undefined, client._starttls);
+            client.bind(user.dn, user.password, function (err2) {
+                assert.ifError(err2)
+                done();
             });
-        };
-        pool._create_client(tests);
-    },
-    'client with tls' : function (test) {
-        test.expect(2);
+        });
+    })
+
+    it('client with tls', function (done) {
         this.cfg.main.tls_enabled = true;
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        var testTls = function(err, client) {
-            test.equals(null, err);
-            test.ok(client._starttls.success);
-            test.done();
-        };
-        var pool = new ldappool.LdapPool(this.cfg);
-        pool._create_client(testTls);
-    }
-};
+        const pool = new ldappool.LdapPool(this.cfg);
+        pool._create_client(function (err, client) {
+            assert.ifError(err);
+            assert.ok(client._starttls.success);
+            done();
+        });
+    })
+})
 
-exports.close = {
-    setUp : _set_up,
-    'test if connections are closed after call' : function(test) {
-        test.expect(4);
-        var pool = new ldappool.LdapPool(this.cfg);
-        test.equals(0, pool.pool['servers'].length);
-        var testClose = function(err, client) {
-            test.equals(true, client.connected);
-            test.equals(undefined, client.unbound);
-            pool.close(function(err) {
-                test.equals(true, client.unbound);
-                test.done();
-            });
-        };
-        pool.get(testClose);
-    }
-};
+describe('close', function () {
 
-exports._bind_default = {
-    setUp : _set_up,
-    'bind with given binddn / bindpw' : function(test) {
-        test.expect(1);
-        var pool = new ldappool.LdapPool(this.cfg);
-        var tests = function(err, client) {
-            test.equals(true, client.connected);
-            test.done();
-        };
-        pool._bind_default(tests);
-    },
-    'bind with no binddn / bindpw' : function(test) {
-        test.expect(1);
+    beforeEach(_set_up);
+
+    it('test if connections are closed after call', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        assert.equal(0, pool.pool.servers.length);
+        pool.get(function (err, client) {
+            assert.equal(true, client.connected);
+            assert.equal(undefined, client.unbound);
+            pool.close((err2) => {
+                assert.ifError(err2)
+                assert.equal(true, client.unbound);
+                done();
+            })
+        })
+    })
+})
+
+describe('_bind_default', function () {
+
+    beforeEach(_set_up);
+
+    it('bind with given binddn / bindpw', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        pool._bind_default(function (err, client) {
+            assert.equal(true, client.connected);
+            done();
+        });
+    })
+
+    it('bind with no binddn / bindpw', function (done) {
         this.cfg.main.binddn = undefined;
         this.cfg.main.bindpw = undefined;
-        var pool = new ldappool.LdapPool(this.cfg);
-        var tests = function(err, client) {
-            test.equals(false, client.connected);
-            test.done();
-        };
-        pool._bind_default(tests);
-    },
-    'bind with invalid binddn / bindpw' : function(test) {
-        test.expect(1);
+        const pool = new ldappool.LdapPool(this.cfg);
+        pool._bind_default(function (err, client) {
+            assert.equal(false, client.connected);
+            done();
+        });
+    })
+
+    it('bind with invalid binddn / bindpw', function (done) {
         this.cfg.main.binddn = 'invalid';
         this.cfg.main.bindpw = 'invalid';
-        var pool = new ldappool.LdapPool(this.cfg);
-        var tests = function(err, client) {
-            test.equals('InvalidDnSyntaxError', err.name);
-            test.done();
-        };
-        pool._bind_default(tests);
-    }
-};
+        const pool = new ldappool.LdapPool(this.cfg);
+        pool._bind_default(function (err, client) {
+            assert.equal('InvalidDnSyntaxError', err.name);
+            done();
+        });
+    })
+})
 
-exports.get = {
-    setUp : _set_up,
-    'test connection validity and pooling' : function(test) {
-        test.expect(9);
-        var pool = new ldappool.LdapPool(this.cfg);
-        test.equals(0, pool.pool['servers'].length);
-        var tests = function(err, client) {
-            test.equals(null, err);
-            test.equals(1, pool.pool['servers'].length);
-            test.equals('ldap://localhost:389', client.url.href);
-            pool.get(function(err, client) {
-                test.equals(null, err);
-                test.equals(2, pool.pool['servers'].length);
-                test.equals('ldaps://localhost:636', client.url.href);
-                pool.get(function(err, client) {
-                    test.equals(2, pool.pool['servers'].length);
-                    test.equals('ldap://localhost:389', client.url.href);
-                    test.done();
+describe('get', function () {
+    beforeEach(_set_up);
+    it('test connection validity and pooling', function (done) {
+        const pool = new ldappool.LdapPool(this.cfg);
+        assert.equal(0, pool.pool.servers.length);
+        pool.get(function (err, client) {
+            assert.equal(null, err);
+            assert.equal(1, pool.pool.servers.length);
+            assert.equal('ldap://localhost:3389', client.url.href);
+            pool.get(function (err2, client2) {
+                assert.equal(null, err2);
+                assert.equal(2, pool.pool.servers.length);
+                assert.equal('ldaps://localhost:3636', client2.url.href);
+                pool.get(function (err3, client3) {
+                    assert.equal(2, pool.pool.servers.length);
+                    assert.equal('ldap://localhost:3389', client3.url.href);
+                    done();
                 });
             });
-        };
-        pool.get(tests);
-    }
-};
+        });
+    })
+})
