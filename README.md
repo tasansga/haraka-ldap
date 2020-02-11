@@ -1,5 +1,4 @@
 [![Build Status][ci-img]][ci-url]
-[![Code Coverage][cov-img]][cov-url]
 [![Code Climate][clim-img]][clim-url]
 [![NPM][npm-img]][npm-url]
 
@@ -207,8 +206,6 @@ The search filter applies only to groups (`objectclass=groupOfNames`) with an em
 
 [ci-img]: https://travis-ci.org/haraka/haraka-plugin-ldap.svg
 [ci-url]: https://travis-ci.org/haraka/haraka-plugin-ldap
-[cov-img]: https://codecov.io/github/haraka/haraka-plugin-ldap/coverage.svg
-[cov-url]: https://codecov.io/github/haraka/haraka-plugin-ldap
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-ldap/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-ldap
 [npm-img]: https://nodei.co/npm/haraka-plugin-ldap.png
