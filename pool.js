@@ -81,7 +81,7 @@ LdapPool.prototype._bind_default = function (next) {
     else {
         return this._create_client(next);
     }
-};
+}
 
 LdapPool.prototype.get = function (next) {
     const pool = this.pool;
@@ -95,6 +95,6 @@ LdapPool.prototype.get = function (next) {
         pool.servers.push(client);
         return next(err, client);
     });
-};
+}
 
 exports.LdapPool = LdapPool;
