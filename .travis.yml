@@ -11,12 +11,12 @@ addons:
       - travis.my-domain.com
 
 before_install:
-    # - tests/travis/ldap-setup.sh
+    # - test/travis/ldap-setup.sh
     - sed -i -e '/^server/ s/:389/:3389/' -e 's/^server.*:636$//' config/ldap.ini
     - mkdir /tmp/slapd
-    - slapd -f tests/travis/slapd.conf -h ldap://localhost:3389 &
+    - slapd -f test/travis/slapd.conf -h ldap://localhost:3389 &
     - sleep 3
-    - ldapadd -x -D "cn=admin,dc=my-domain,dc=com" -w "rAR84,NZ=F" -h localhost:3389 -f tests/env/testdata.ldif
+    - ldapadd -x -D "cn=admin,dc=my-domain,dc=com" -w "rAR84,NZ=F" -h localhost:3389 -f test/env/testdata.ldif
 
 services:
 # https://docs.travis-ci.com/user/database-setup/
