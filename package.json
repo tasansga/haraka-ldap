@@ -28,15 +28,15 @@
   "license": "MIT",
   "devDependencies": {
     "btoa": "*",
-    "eslint": "^4.8.0",
-    "eslint-plugin-haraka": "^1.0.9",
-    "haraka-test-fixtures": "^1.0.9"
+    "eslint": "*",
+    "eslint-plugin-haraka": "*",
+    "haraka-test-fixtures": "*",
+    "mocha": "*"
   },
   "dependencies": {
     "address-rfc2821": "*",
-    "async": "^2.1.2",
+    "async": "^2.6.2",
     "haraka-constants": "*",
-    "ldapjs": "^1.0.1",
-    "mocha": "*"
+    "ldapjs": "^1.0.2"
   }
 }
