@@ -16,15 +16,7 @@ before_install:
     - mkdir /tmp/slapd
     - slapd -f test/travis/slapd.conf -h "ldap://localhost:3389 ldaps://localhost:3636" &
     - sleep 3
-    - ldapadd -x -D "cn=admin,dc=my-domain,dc=com" -w "rAR84,NZ=F" -h localhost:3389 -f test/env/testdata.ldif
-
-services:
-# https://docs.travis-ci.com/user/database-setup/
-#  - mongodb
-#  - elasticsearch
-#  - redis-server
-
-before_script:
+    - ldapadd -x -D "cn=admin,dc=my-domain,dc=com" -w "rAR84,NZ=F" -H ldap://localhost:3389 -f test/env/testdata.ldif
 
 script:
     - npm run lint

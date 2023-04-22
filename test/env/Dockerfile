@@ -21,4 +21,4 @@ EXPOSE 636
 
 ENTRYPOINT ["/usr/sbin/slapd", "-u", "ldap", "-h" , "ldap:/// ldaps:///", "-d129"]
 
-# run with: docker run -p 389:389 -p 636:636 [...] 
+# run with: docker run -p 389:389 -p 636:636 [...]

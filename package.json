@@ -7,7 +7,8 @@
   "scripts": {
     "lint": "npx eslint *.js test/**/*.js",
     "lintfix": "npx eslint --fix *.js test/**/*.js",
-    "test": "npx mocha"
+    "test": "npx mocha",
+    "versions": "npx dependency-version-checker check"
   },
   "keywords": [
     "haraka",
@@ -28,14 +29,13 @@
   "license": "MIT",
   "devDependencies": {
     "btoa": "*",
-    "eslint": "*",
+    "eslint": ">=6",
     "eslint-plugin-haraka": "*",
     "haraka-test-fixtures": "*",
     "mocha": "*"
   },
   "dependencies": {
     "address-rfc2821": "*",
-    "async": "^3.2.2",
     "haraka-constants": "*",
     "ldapjs": "^1.0.2"
   }

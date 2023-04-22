@@ -117,8 +117,8 @@ exports.aliases = function (next, connection, params) {
         }
         connection.logdebug(plugin, `Aliasing ${  util.inspect(rcpt)  } to ${  util.inspect(result)}`);
         connection.transaction.rcpt_to.pop();
-        for (let i=0; i<result.length; i++) {
-            const toAddress = new Address(`<${  result[i]  }>`);
+        for (const element of result) {
+            const toAddress = new Address(`<${    element  }>`);
             connection.transaction.rcpt_to.push(toAddress);
         }
         next();

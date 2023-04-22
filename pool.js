@@ -8,8 +8,8 @@ const LdapPool = function (config) {
 };
 
 LdapPool.prototype._set_config = function (config) {
-    if (config === undefined) { config = {}; }
-    if (config.main === undefined) { config.main = {}; }
+    if (config === undefined) config = {};
+    if (config.main === undefined) config.main = {};
     this.config = {
         servers : config.main.server || [ 'ldap://localhost:389' ],
         timeout : config.main.timeout,
