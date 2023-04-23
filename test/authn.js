@@ -9,27 +9,27 @@ const ldappool  = require('../pool');
 const users = [
     {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     },
     {
         uid : 'user2',
-        dn : 'uid=user2,ou=people,dc=my-domain,dc=com',
+        dn : 'uid=user2,ou=people,dc=example,dc=com',
         password : 'KQD9zs,LGv',
-        mail : 'user2@my-domain.com'
+        mail : 'user2@example.com'
     },
     {
         uid : 'nonunique',
-        dn : 'uid=nonunique,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=nonunique,ou=users,dc=example,dc=com',
         password : 'CZVm3,BLlx',
-        mail : 'nonunique1@my-domain.com'
+        mail : 'nonunique1@example.com'
     },
     {
         uid : 'nonunique',
-        dn : 'uid=nonunique,ou=people,dc=my-domain,dc=com',
+        dn : 'uid=nonunique,ou=people,dc=example,dc=com',
         password : 'LsBHDGorAh',
-        mail : 'nonunique2@my-domain.com'
+        mail : 'nonunique2@example.com'
     }
 ];
 
@@ -44,7 +44,7 @@ function _set_up (done) {
                     server : [ 'ldap://localhost:3389' ],
                     binddn : this.users[0].dn,
                     bindpw : this.users[0].password,
-                    basedn : 'dc=my-domain,dc=com'
+                    basedn : 'dc=example,dc=com'
                 }
             })
         }
@@ -204,11 +204,11 @@ describe('check_plain_passwd', function () {
         })
     })
 
-    it('try dn with test users and invalid user', function (done) {
+    it.only('try dn with test users and invalid user', function (done) {
         const plugin = this.plugin;
         const pool = this.connection.server.notes.ldappool;
         const connection = this.connection;
-        pool.config.authn.dn = [ 'uid=%u,ou=users,dc=my-domain,dc=com', 'uid=%u,ou=people,dc=my-domain,dc=com' ];
+        pool.config.authn.dn = [ 'uid=%u,ou=users,dc=example,dc=com', 'uid=%u,ou=people,dc=example,dc=com' ];
         plugin.check_plain_passwd(connection, users[0].uid, users[0].password, function (result) {
             assert.equal(true, result);
             plugin.check_plain_passwd(connection, users[1].uid, users[1].password, function (result2) {

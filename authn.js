@@ -88,7 +88,9 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
             cb(result !== undefined && result !== null);
         });
     }
-    function callback (err, userdn) {
+
+    connection.logdebug(`Looking up user ${  util.inspect(user)  } by search.`);
+    plugin._get_dn_for_uid(user, function (err, userdn) {
         if (err) {
             connection.logerror(`Could not use LDAP for password check: ${  util.inspect(err)}`);
             return cb(false);
@@ -100,7 +102,5 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
         else {
             return plugin._verify_user(userdn[0], passwd, cb, connection);
         }
-    }
-    connection.logdebug(`Looking up user ${  util.inspect(user)  } by search.`);
-    plugin._get_dn_for_uid(user, callback, connection);
+    }, connection);
 };

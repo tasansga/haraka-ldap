@@ -25,7 +25,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
-    - run: sudo apt-get install --no-install-recommends -y slapd=2.5.14
+    - run: sudo ./test/fixtures/linux/setup.sh
     - run: npm test
 
   # test-win:

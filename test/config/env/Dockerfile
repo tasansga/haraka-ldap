@@ -12,7 +12,7 @@ RUN \
     ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif && \
     ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/misc.ldif && \
     ldapadd -Y EXTERNAL -H ldapi:/// -f /config.ldif && \
-    ldapadd -x -D "cn=Manager,dc=my-domain,dc=com" \
+    ldapadd -x -D "cn=Manager,dc=example,dc=com" \
             -w "rAR84,NZ=F" -H ldapi:/// -f /testdata.ldif && \
     rm -f /config.ldif /testdata.ldif
 

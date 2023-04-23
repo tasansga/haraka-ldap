@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "npx eslint *.js test/**/*.js",
     "lintfix": "npx eslint --fix *.js test/**/*.js",
-    "test": "npx mocha",
+    "test": "npx mocha --exit",
     "versions": "npx dependency-version-checker check"
   },
   "keywords": [

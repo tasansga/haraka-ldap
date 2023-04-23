@@ -7,16 +7,16 @@ const ldappool  = require('../pool');
 function _set_up (done) {
     this.user = {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     };
     this.cfg = {
         main : {
             server : [ 'ldap://localhost:3389', 'ldaps://localhost:3636' ],
             binddn : this.user.dn,
             bindpw : this.user.password,
-            basedn : 'dc=my-domain,dc=com'
+            basedn : 'dc=example,dc=com'
         }
     };
     done();

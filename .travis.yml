@@ -8,15 +8,15 @@ addons:
     - ldap-utils
     - slapd
   hosts:
-      - travis.my-domain.com
+      - travis.example.com
 
 before_install:
     # - test/travis/ldap-setup.sh
     - sed -i -e '/^server/ s/:389/:3389/' -e 's/^server.*:636$/:3636/' config/ldap.ini
     - mkdir /tmp/slapd
-    - slapd -f test/travis/slapd.conf -h "ldap://localhost:3389 ldaps://localhost:3636" &
+    - slapd -f test/fixtures/travis/slapd.conf -h "ldap://localhost:3389 ldaps://localhost:3636" &
     - sleep 3
-    - ldapadd -x -D "cn=admin,dc=my-domain,dc=com" -w "rAR84,NZ=F" -H ldap://localhost:3389 -f test/env/testdata.ldif
+    - ldapadd -x -D "cn=admin,dc=example,dc=com" -w "rAR84,NZ=F" -H ldap://localhost:3389 -f test/env/testdata.ldif
 
 script:
     - npm run lint
