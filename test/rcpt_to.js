@@ -55,7 +55,7 @@ describe('_verify_existence', function () {
     it('invalid search filter', function (done) {
         this.connection.server.notes.ldappool.config.rcpt_to.searchfilter =  '(&(objectclass=*)(|(mail=%a';
         this.plugin._verify_existence(this.user.mail, function (err, result) {
-            assert.equal('Error: (|(mail=user1@example.co has unbalanced parentheses', err.toString());
+            assert.equal('unbalanced parens', err.message);
             assert.equal(false, result);
             done();
         }, this.connection);

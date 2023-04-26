@@ -74,7 +74,7 @@ LdapPool.prototype._bind_default = function (next) {
             if (err) return next(err);
 
             client.bind(cfg.binddn, cfg.bindpw, function (err2) {
-                return next(err2, client);
+                next(err2, client);
             });
         });
     }
@@ -85,15 +85,17 @@ LdapPool.prototype._bind_default = function (next) {
 
 LdapPool.prototype.get = function (next) {
     const pool = this.pool;
+
     if (pool.servers.length >= this.config.servers.length) {
         // shift and push for round-robin
         const client = pool.servers.shift();
         pool.servers.push(client);
         return next(null, client);
     }
+
     this._bind_default( (err, client) => {
         pool.servers.push(client);
-        return next(err, client);
+        next(err, client);
     });
 }
 

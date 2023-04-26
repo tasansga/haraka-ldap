@@ -5,8 +5,8 @@
   "main": "index.js",
   "directories": {},
   "scripts": {
-    "lint": "npx eslint *.js test/**/*.js",
-    "lintfix": "npx eslint --fix *.js test/**/*.js",
+    "lint": "npx eslint *.js test/*.js",
+    "lintfix": "npx eslint --fix *.js test/*.js",
     "test": "npx mocha --exit",
     "versions": "npx dependency-version-checker check"
   },
@@ -25,18 +25,18 @@
     "name": "Ansgar Tasler",
     "email": "ansgar.tasler@warkdag.com"
   },
-  "repository": "https://github.com/tasansga/haraka-ldap.git",
+  "repository": "https://github.com/haraka/haraka-plugin-ldap.git",
   "license": "MIT",
   "devDependencies": {
     "btoa": "*",
-    "eslint": ">=6",
+    "eslint": "8",
     "eslint-plugin-haraka": "*",
     "haraka-test-fixtures": "*",
-    "mocha": "*"
+    "mocha": "9"
   },
   "dependencies": {
     "address-rfc2821": "*",
     "haraka-constants": "*",
-    "ldapjs": "^1.0.2"
+    "ldapjs": "^2.3.3"
   }
 }

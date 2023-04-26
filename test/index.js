@@ -137,18 +137,22 @@ describe('check_plain_passwd', function () {
 
     beforeEach(_set_up)
 
-    it('basic functionality: valid login ok, invalid login fails', function (done) {
-        const plugin = this.plugin;
-        const user = this.user;
-        const connection = this.connection;
-        plugin._init_ldappool(function next () {
-            connection.server.notes.ldappool.config.authn = {  };
-            plugin.check_plain_passwd(connection, user.uid, user.password, function (result) {
+    it('basic functionality: valid login ok', function (done) {
+        this.plugin._init_ldappool(() => {
+            this.connection.server.notes.ldappool.config.authn = {  };
+            this.plugin.check_plain_passwd(this.connection, this.user.uid, this.user.password, (result) => {
                 assert.equal(true, result);
-                plugin.check_plain_passwd(connection, user.uid, 'invalid', function (result2) {
-                    assert.equal(false, result2);
-                    done();
-                })
+                done();
+            })
+        }, this.server);
+    })
+
+    it('basic functionality: invalid login fails', function (done) {
+        this.plugin._init_ldappool(() => {
+            this.connection.server.notes.ldappool.config.authn = {  };
+            this.plugin.check_plain_passwd(this.connection, this.user.uid, 'invalid', (result2) => {
+                assert.equal(false, result2);
+                done();
             })
         }, this.server);
     })
@@ -303,14 +307,15 @@ describe('_init_ldappool', function () {
 
 describe('shutdown', function () {
     beforeEach(_set_up)
+
     it('make sure ldappool gets closed', function (done) {
         this.plugin._init_ldappool(() => {
             this.server.notes.ldappool.get((err, client) => {
-                this.plugin.shutdown(function () {
+                this.plugin.shutdown(() => {
                     assert.equal(true, client.unbound);
                     done();
-                });
-            });
+                })
+            })
         }, this.server);
     })
 })

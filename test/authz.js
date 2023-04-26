@@ -69,7 +69,7 @@ describe('_verify_address', function () {
         const pool = this.connection.server.notes.ldappool;
         pool.config.authz.searchfilter =  '(&(objectclass=*)(|(uid=%u';
         this.plugin._verify_address(user.uid, user.mail, function (err, result) {
-            assert.equal('Error: (|(uid=user has unbalanced parentheses', err.toString());
+            assert.equal('unbalanced parens', err.message);
             assert.equal(false, result);
             done();
         }, this.connection);

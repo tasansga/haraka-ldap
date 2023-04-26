@@ -1,31 +1,31 @@
 'use strict';
 
-const async = require('async');
 const util  = require('util');
 
 exports._verify_user = function (userdn, passwd, cb, connection) {
     const pool = connection.server.notes.ldappool;
+
     function onError (err) {
         connection.logerror(`Could not verify userdn and password: ${  util.inspect(err)}`);
         cb(false);
     }
-    if (!pool) {
-        return onError('LDAP Pool not found');
-    }
+
+    if (!pool) return onError('LDAP Pool not found');
+
     pool._create_client((err, client) => {
         if (err) return onError(err);
 
         client.bind(userdn, passwd, (err2) => {
             if (err2) {
                 connection.logdebug(`Login failed, could not bind ${ util.inspect(userdn) }: ${ util.inspect(err)}`);
-                return cb(false);
+                return cb(false)
             }
 
             client.unbind();
-            return cb(true);
-        });
-    });
-};
+            cb(true);
+        })
+    })
+}
 
 exports._get_search_conf = function (user, connection) {
     const pool = connection.server.notes.ldappool;
@@ -74,33 +74,48 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
 }
 
 exports.check_plain_passwd = function (connection, user, passwd, cb) {
-    const plugin = this;
-    const pool = connection.server.notes.ldappool;
 
-    function search (userdn, searchCallback) {
-        userdn = userdn.replace(/%u/g, user);
-        return plugin._verify_user(userdn, passwd, searchCallback, connection);
-    }
-
-    if (Array.isArray(pool.config.authn.dn)) {
-        connection.logdebug(`Looking up user ${  util.inspect(user)  } by DN.`);
-        return async.detect(pool.config.authn.dn, search, (result) => {
-            cb(result !== undefined && result !== null);
-        });
+    if (Array.isArray(connection.server.notes.ldappool.config.authn.dn)) {
+        return this.check_plain_passwd_dn(connection, user, passwd, cb)
     }
 
     connection.logdebug(`Looking up user ${  util.inspect(user)  } by search.`);
-    plugin._get_dn_for_uid(user, function (err, userdn) {
+    this._get_dn_for_uid(user, (err, userdn) => {
         if (err) {
             connection.logerror(`Could not use LDAP for password check: ${  util.inspect(err)}`);
-            return cb(false);
+            cb(false);
         }
         else if (userdn.length !== 1) {
             connection.logdebug(`None or nonunique LDAP search result for user ${  util.inspect(user)  }, access denied`);
             cb(false);
         }
         else {
-            return plugin._verify_user(userdn[0], passwd, cb, connection);
+            this._verify_user(userdn[0], passwd, cb, connection);
         }
     }, connection);
 };
+
+exports.check_plain_passwd_dn = function (connection, user, passwd, cb) {
+    // console.warn(`check_plain_passwd_dn look up for user ${ util.inspect(user) }`);
+    connection.logdebug(`Looking up user ${ util.inspect(user) } by DN.`);
+
+    let iter = 0
+    let cbCalled = false
+
+    function cbOnce (result) {
+        iter++
+        if (cbCalled) return
+        if (result) {
+            cbCalled = true
+            return cb(result)
+        }
+        if (iter === connection.server.notes.ldappool.config.authn.dn.length) {
+            cbCalled = true
+            cb(result)
+        }
+    }
+
+    for (const dn of connection.server.notes.ldappool.config.authn.dn) {
+        this._verify_user(dn.replace(/%u/g, user), passwd, cbOnce, connection);
+    }
+}
