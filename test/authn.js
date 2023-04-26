@@ -204,7 +204,7 @@ describe('check_plain_passwd', function () {
         })
     })
 
-    it.only('try dn with test users and invalid user', function (done) {
+    it('try dn with test users and invalid user', function (done) {
         const plugin = this.plugin;
         const pool = this.connection.server.notes.ldappool;
         const connection = this.connection;
