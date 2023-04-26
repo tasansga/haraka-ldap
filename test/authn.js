@@ -127,10 +127,17 @@ describe('get_dn_for_uid', function () {
     beforeEach(_set_up)
 
     it('user 1 dn2uid', function (done) {
-        const user = this.users[0];
-        this.plugin._get_dn_for_uid(user.uid, function (err, userdn) {
+        this.plugin._get_dn_for_uid(users[0].uid, function (err, userdn) {
             assert.equal(null, err);
-            assert.equal(userdn.toString(), user.dn);
+            assert.equal(userdn.toString(), users[0].dn);
+            done();
+        }, this.connection);
+    })
+
+    it('user 2 dn2uid', function (done) {
+        this.plugin._get_dn_for_uid(users[1].uid, function (err, userdn) {
+            assert.equal(null, err);
+            assert.equal(userdn.toString(), users[1].dn);
             done();
         }, this.connection);
     })

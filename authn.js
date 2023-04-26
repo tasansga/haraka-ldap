@@ -46,9 +46,8 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
         connection.logdebug(`: ${util.inspect(err)}`);
         callback(err);
     }
-    if (!pool) {
-        return onError('LDAP Pool not found!');
-    }
+    if (!pool) return onError('LDAP Pool not found!');
+
     pool.get((err, client) => {
         if (err) return onError(err);
 
@@ -56,7 +55,7 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
         connection.logdebug(`Getting DN for uid: ${  util.inspect(config)}`);
         try {
             client.search(config.basedn, config, function (search_error, res) {
-                if (search_error) { onError(search_error); }
+                if (search_error) onError(search_error);
                 const userdn=[];
                 res.on('searchEntry', function (entry) {
                     userdn.push(entry.object.dn);
@@ -68,7 +67,7 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
             });
         }
         catch (e) {
-            return onError(e);
+            onError(e);
         }
     })
 }
@@ -96,7 +95,6 @@ exports.check_plain_passwd = function (connection, user, passwd, cb) {
 };
 
 exports.check_plain_passwd_dn = function (connection, user, passwd, cb) {
-    // console.warn(`check_plain_passwd_dn look up for user ${ util.inspect(user) }`);
     connection.logdebug(`Looking up user ${ util.inspect(user) } by DN.`);
 
     let iter = 0

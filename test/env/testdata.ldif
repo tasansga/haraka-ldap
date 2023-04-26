@@ -1,3 +1,9 @@
+# example config file - global configuration entry
+#dn: cn=config
+#objectClass: olcGlobal
+#cn: config
+#olcReferral: ldap://root.openldap.org
+
 # add base dn
 dn: dc=example,dc=com
 changetype: add

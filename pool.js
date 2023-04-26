@@ -43,18 +43,14 @@ LdapPool.prototype._get_ldapjs_config = function () {
 
 LdapPool.prototype._create_client = function (next) {
     const client = ldap.createClient(this._get_ldapjs_config());
-    const starttls = function (err) {
-        if (err) {
-            return next(err);
-        }
-        return next(null, client);
-    };
-    if (this.config.tls_enabled || false) {
-        client.starttls({ }, null, starttls);
-    }
-    else {
-        return next(null, client);
-    }
+
+    if (!this.config.tls_enabled) return next(null, client);
+
+    console.log(`starting TLS`)
+    client.starttls({ }, null, function (err) {
+        if (err) return next(err);
+        next(null, client);
+    });
 }
 
 LdapPool.prototype.close = function (next) {
