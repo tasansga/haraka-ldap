@@ -9,4 +9,4 @@ rm -r /var/tmp/slapd/* || exit
 /opt/local/libexec/slapd -f test/fixtures/macosx/slapd.conf -h "ldap://localhost:3389 ldaps://localhost:3636" &
 sleep 3
 
-/opt/local/bin/ldapadd -x -D "cn=admin,dc=example,dc=com" -w "rAR84,NZ=F" -H ldap://localhost:3389 -f test/config/env/testdata.ldif
+/opt/local/bin/ldapadd -x -D "cn=admin,dc=example,dc=com" -w "rAR84,NZ=F" -H ldap://localhost:3389 -f test/env/testdata.ldif

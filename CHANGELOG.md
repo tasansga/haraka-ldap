@@ -1,6 +1,14 @@
 ####
 
 
+### 1.1.0 - 2023-04-26
+
+- ci: switch travis -> GHA
+- test: use RFC example.com for test domain
+- authn: replace async.detect with local fn
+- noop: remove some useless returns
+- test: refactored some to improve error messages
+
 
 ### 1.0.2 - 2017-09-30
 
