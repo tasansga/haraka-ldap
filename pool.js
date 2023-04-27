@@ -47,6 +47,10 @@ class LdapPool {
     _create_client (next) {
         const client = ldap.createClient(this._get_ldapjs_config());
 
+        client.on('connectError', (err) => {
+            console.error(err)
+        })
+
         if (!this.config.tls_enabled)
             return next(null, client);
 

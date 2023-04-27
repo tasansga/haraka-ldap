@@ -52,12 +52,13 @@ describe('_get_alias', function () {
 
     it('ok with test group', function (done) {
         this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
-        this.plugin._get_alias(this.group.mail, function (err, result) {
+        this.plugin._get_alias(this.group.mail, (err, result) => {
             assert.ifError(err);
-            result.sort();
-            assert.equal('nonunique1@example.com', result[0]);
-            assert.equal('user1@example.com', result[1]);
-            assert.equal('user2@example.com', result[2]);
+            assert.deepStrictEqual([
+                'nonunique1@example.com',
+                'user1@example.com',
+                'user2@example.com'
+            ], result.sort())
             done();
         }, this.connection);
     })

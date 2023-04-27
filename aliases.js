@@ -1,6 +1,5 @@
 'use strict';
 
-const async     = require('async');
 const util      = require('util');
 const Address   = require('address-rfc2821').Address;
 const constants = require('haraka-constants');
@@ -40,11 +39,11 @@ exports._get_alias = function (address, callback, connection) {
             })
         }
         catch (e) {
-            return onError(e);
+            onError(e);
         }
     };
     pool.get(search);
-};
+}
 
 exports._get_search_conf_alias = (address, connection) => {
     const pool = connection.server.notes.ldappool;
@@ -56,7 +55,7 @@ exports._get_search_conf_alias = (address, connection) => {
         scope: pool.config.aliases.scope || pool.config.scope,
         attributes: [ pool.config.aliases.attribute || 'mailForwardingAddress' ]
     };
-};
+}
 
 exports._resolve_dn_to_alias = (dn, callback, connection) => {
     const pool = connection.server.notes.ldappool;
@@ -71,53 +70,69 @@ exports._resolve_dn_to_alias = (dn, callback, connection) => {
         scope: 'base',
         attributes: [ pool.config.aliases.subattribute || 'mailLocalAddress' ]
     };
+
     pool.get((err, client) => {
         if (err) return onError(err);
         connection.logdebug(`Resolving DN ${  util.inspect(dn)  } to alias: ${  util.inspect(config)}`);
 
-        async.concat(dn, (dn2, searchCallback) => {
-            client.search(dn2, config, (search_error, res) => {
-                if (search_error) { onError(search_error, dn2); }
-                res.on('searchEntry', (entry) => {
-                    let arr_addr = entry.object[config.attributes[0]];
-                    if (Array.isArray(arr_addr)) {
-                        arr_addr = arr_addr[0];
-                    }
-                    searchCallback(null, arr_addr);
-                });
-                res.on('error', (e) => {
-                    connection.logwarn(`Could not retrieve DN ${  util.inspect(dn)  }`);
-                    connection.logdebug(`${util.inspect(e)}`);
-                    searchCallback(null, []);
-                });
-            });
-        }, callback);
-    });
-};
+        const promises = []
+        for (const d of dn) {
+            promises.push(new Promise((resolve) => {
+                const entries = []
+
+                client.search(d, config, (search_error, res) => {
+                    if (search_error)
+                        onError(search_error, d);
+
+                    res.on('searchEntry', (entry) => {
+                        const arr_addr = entry.object[config.attributes[0]];
+                        entries.push(Array.isArray(arr_addr) ? arr_addr[0] : arr_addr)
+                    })
+
+                    res.on('error', (e) => {
+                        connection.logwarn(`Could not retrieve DN ${util.inspect(d)}`);
+                        connection.logdebug(`${util.inspect(e)}`);
+                        resolve([]);
+                    })
+
+                    res.on('end', (r) => {
+                        resolve(entries);
+                    })
+                })
+            }))
+        }
+
+        Promise.all(promises)
+            .then((res) => {
+                callback(null, res.flat())
+            })
+            .catch(e => {
+                connection.logerror(`AllResolvedErr: ${e}`)
+            })
+    })
+}
 
 exports.aliases = function (next, connection, params) {
-    const plugin = this;
     if (!params || !params[0] || !params[0].address) {
         connection.logerror(`Ignoring invalid call. Given params: ${util.inspect(params)}`);
         return next();
     }
     const rcpt = params[0].address();
-    const handleAliases = function (err, result) {
+    this._get_alias(rcpt, (err, result) => {
         if (err) {
             connection.logerror(`Could not use LDAP to resolve aliases: ${err.message}`);
             return next(constants.denysoft);
         }
         if (result.length === 0) {
-            connection.logdebug(`No aliases results found for rcpt: ${  util.inspect(rcpt)}`);
+            connection.logdebug(`No aliases results found for rcpt: ${util.inspect(rcpt)}`);
             return next();
         }
-        connection.logdebug(plugin, `Aliasing ${  util.inspect(rcpt)  } to ${  util.inspect(result)}`);
+        connection.logdebug(this, `Aliasing ${util.inspect(rcpt)} to ${util.inspect(result)}`);
         connection.transaction.rcpt_to.pop();
         for (const element of result) {
-            const toAddress = new Address(`<${    element  }>`);
+            const toAddress = new Address(`<${element}>`);
             connection.transaction.rcpt_to.push(toAddress);
         }
         next();
-    };
-    plugin._get_alias(rcpt, handleAliases, connection);
-};
+    }, connection);
+}

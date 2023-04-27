@@ -3,11 +3,19 @@
 
 ### 1.1.0 - 2023-04-26
 
-- ci: switch travis -> GHA
-- test: use RFC example.com for test domain
 - authn: replace async.detect with local fn
-- noop: remove some useless returns
+- aliases: replace async with Promise.all
+- dep(async): removed
+- dep(ldapjs): update from 1.0.2 to 2.3.3
+- noop: remove useless returns
+- es6: more arrow functions
+- style: inline use of `plugin`
+- ci: switch travis -> GHA
+- ci: enable codeql
+- test: use RFC example.com for test domain
 - test: refactored some to improve error messages
+- test: add fixtures for setting up slapd on macosx and linux
+- doc(README): update with GHA badge
 
 
 ### 1.0.2 - 2017-09-30

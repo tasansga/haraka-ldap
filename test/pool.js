@@ -49,7 +49,7 @@ describe('_set_config', () => {
         const pool = new ldappool.LdapPool(testCfg);
         const cfg = { main : {
             server : 'testserver',
-            timeout : 10_000,
+            timeout : 10000,
             tls_enabled : true,
             tls_rejectUnauthorized : true,
             scope : 'one',

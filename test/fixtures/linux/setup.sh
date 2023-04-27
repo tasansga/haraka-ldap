@@ -9,7 +9,7 @@ fi
 sudo killall slapd
 sudo aa-complain /usr/sbin/slapd
 
-sed -i -e '/^server/ s/:389/:3389/' -e 's/^server/ s/:636$/:3636/' config/ldap.ini
+sed -i -e '/^server/ s/:389/:3389/' -e '/^server/ s/:636$/:3636/' config/ldap.ini
 
 if [ ! -d "/tmp/slapd" ]; then sudo mkdir /tmp/slapd; fi
 sudo rm -rf /tmp/slapd/* /var/lib/ldap/*
