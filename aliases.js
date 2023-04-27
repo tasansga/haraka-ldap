@@ -6,7 +6,6 @@ const Address   = require('address-rfc2821').Address;
 const constants = require('haraka-constants');
 
 exports._get_alias = function (address, callback, connection) {
-    const plugin = this;
     const pool = connection.server.notes.ldappool;
     if (!pool) {
         return onError('LDAP Pool not found!');
@@ -16,53 +15,50 @@ exports._get_alias = function (address, callback, connection) {
         connection.logdebug(`${util.inspect(err)}`);
         callback(err, false);
     }
-    const search = function (err, client) {
-        if (err) {
+    const search = (err, client) => {
+        if (err)
             return onError(err);
-        }
-        else {
-            const config = plugin._get_search_conf_alias(address, connection);
-            connection.logdebug(`Checking address for alias: ${  util.inspect(config)}`);
-            try {
-                client.search(config.basedn, config, function (search_error, res) {
-                    if (search_error) { onError(search_error); }
-                    let alias = [];
-                    res.on('searchEntry', function (entry) {
-                        alias = alias.concat(entry.object[config.attributes[0]]);
-                    });
-                    res.on('error', onError);
-                    res.on('end', function () {
-                        if (pool.config.aliases.attribute_is_dn) {
-                            plugin._resolve_dn_to_alias(alias, callback, connection);
-                        }
-                        else {
-                            callback(null, alias);
-                        }
-                    });
+
+        const config = this._get_search_conf_alias(address, connection);
+        connection.logdebug(`Checking address for alias: ${  util.inspect(config)}`);
+        try {
+            client.search(config.basedn, config, (search_error, res) => {
+                if (search_error) { onError(search_error); }
+                let alias = [];
+                res.on('searchEntry', (entry) => {
+                    alias = alias.concat(entry.object[config.attributes[0]]);
                 });
-            }
-            catch (e) {
-                return onError(e);
-            }
+                res.on('error', onError);
+                res.on('end', () => {
+                    if (pool.config.aliases.attribute_is_dn) {
+                        this._resolve_dn_to_alias(alias, callback, connection);
+                    }
+                    else {
+                        callback(null, alias);
+                    }
+                })
+            })
+        }
+        catch (e) {
+            return onError(e);
         }
     };
     pool.get(search);
 };
 
-exports._get_search_conf_alias = function (address, connection) {
+exports._get_search_conf_alias = (address, connection) => {
     const pool = connection.server.notes.ldappool;
     let filter = pool.config.aliases.searchfilter || '(&(objectclass=*)(mail=%a)(mailForwardAddress=*))';
     filter = filter.replace(/%a/g, address);
-    const config = {
+    return {
         basedn: pool.config.aliases.basedn || pool.config.basedn,
         filter,
         scope: pool.config.aliases.scope || pool.config.scope,
         attributes: [ pool.config.aliases.attribute || 'mailForwardingAddress' ]
     };
-    return config;
 };
 
-exports._resolve_dn_to_alias = function (dn, callback, connection) {
+exports._resolve_dn_to_alias = (dn, callback, connection) => {
     const pool = connection.server.notes.ldappool;
     if (!pool) {
         return onError('LDAP Pool not found!');
@@ -80,16 +76,16 @@ exports._resolve_dn_to_alias = function (dn, callback, connection) {
         connection.logdebug(`Resolving DN ${  util.inspect(dn)  } to alias: ${  util.inspect(config)}`);
 
         async.concat(dn, (dn2, searchCallback) => {
-            client.search(dn2, config, function (search_error, res) {
+            client.search(dn2, config, (search_error, res) => {
                 if (search_error) { onError(search_error, dn2); }
-                res.on('searchEntry', function (entry) {
+                res.on('searchEntry', (entry) => {
                     let arr_addr = entry.object[config.attributes[0]];
                     if (Array.isArray(arr_addr)) {
                         arr_addr = arr_addr[0];
                     }
                     searchCallback(null, arr_addr);
                 });
-                res.on('error', function (e) {
+                res.on('error', (e) => {
                     connection.logwarn(`Could not retrieve DN ${  util.inspect(dn)  }`);
                     connection.logdebug(`${util.inspect(e)}`);
                     searchCallback(null, []);

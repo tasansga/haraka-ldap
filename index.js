@@ -34,7 +34,7 @@ exports.handle_authn = function (next, connection, params) {
     }
 }
 
-exports.hook_capabilities = function (next, connection) {
+exports.hook_capabilities = (next, connection) => {
     // default: don't offer AUTH unless session is encrypted
     if (connection.using_tls) {
         const methods = [ 'PLAIN', 'LOGIN' ];
@@ -45,13 +45,13 @@ exports.hook_capabilities = function (next, connection) {
 }
 
 exports.check_plain_passwd = function () {
-    authn.check_plain_passwd.apply(authn, arguments);
+    authn.check_plain_passwd(...arguments);
 }
 
 exports.aliases = function (next, connection, params) {
     if (!connection.server.notes.ldappool.config.aliases) return next();
 
-    aliases.aliases.apply(aliases, arguments);
+    aliases.aliases(...arguments);
 }
 
 exports.check_rcpt = function (next, connection, params) {

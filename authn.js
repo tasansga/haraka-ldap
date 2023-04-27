@@ -2,7 +2,7 @@
 
 const util  = require('util');
 
-exports._verify_user = function (userdn, passwd, cb, connection) {
+exports._verify_user = (userdn, passwd, cb, connection) => {
     const pool = connection.server.notes.ldappool;
 
     function onError (err) {
@@ -27,7 +27,7 @@ exports._verify_user = function (userdn, passwd, cb, connection) {
     })
 }
 
-exports._get_search_conf = function (user, connection) {
+exports._get_search_conf = (user, connection) => {
     const pool = connection.server.notes.ldappool;
     const filter = pool.config.authn.searchfilter || '(&(objectclass=*)(uid=%u))';
     return {
@@ -39,7 +39,6 @@ exports._get_search_conf = function (user, connection) {
 };
 
 exports._get_dn_for_uid = function (uid, callback, connection) {
-    const plugin = this;
     const pool = connection.server.notes.ldappool;
     function onError (err) {
         connection.logerror(`Could not get DN for UID ${uid}`)
@@ -51,17 +50,17 @@ exports._get_dn_for_uid = function (uid, callback, connection) {
     pool.get((err, client) => {
         if (err) return onError(err);
 
-        const config = plugin._get_search_conf(uid, connection);
+        const config = this._get_search_conf(uid, connection);
         connection.logdebug(`Getting DN for uid: ${  util.inspect(config)}`);
         try {
-            client.search(config.basedn, config, function (search_error, res) {
+            client.search(config.basedn, config, (search_error, res) => {
                 if (search_error) onError(search_error);
                 const userdn=[];
-                res.on('searchEntry', function (entry) {
+                res.on('searchEntry', (entry) => {
                     userdn.push(entry.object.dn);
                 });
                 res.on('error', onError);
-                res.on('end', function () {
+                res.on('end', () => {
                     callback(null, userdn);
                 });
             });
