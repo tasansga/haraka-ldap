@@ -13,7 +13,7 @@ olcRequires: authc
 dn: olcDatabase={2}mdb,cn=config
 changetype: modify
 add: olcRootPW
-olcRootPW: {SSHA}bPf32h0ItVUKLlVzsR6od+Ub5GDZRBIr
+olcRootPW: {SSHA}2Gl8VBvuOxkhcrVCRNzDcCG9ecJHg0gl
 
 # enable tls
 dn: cn=config

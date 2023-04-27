@@ -11,9 +11,9 @@ const pool         = require('../pool');
 function _set_up (done) {
     this.user = {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     };
     this.plugin = new fixtures.plugin('ldap');
     this.server = { notes: { } };
@@ -21,7 +21,7 @@ function _set_up (done) {
         main : {
             binddn : this.user.dn,
             bindpw : this.user.password,
-            basedn : 'dc=my-domain,dc=com'
+            basedn : 'dc=example,dc=com'
         }
     };
     this.connection = fixtures.connection.createConnection();
@@ -32,7 +32,7 @@ function _set_up (done) {
                     server : [ 'ldap://localhost:3389' ],
                     binddn : this.user.dn,
                     bindpw : this.user.password,
-                    basedn : 'dc=my-domain,dc=com'
+                    basedn : 'dc=example,dc=com'
                 }
             })
         }
@@ -137,18 +137,22 @@ describe('check_plain_passwd', function () {
 
     beforeEach(_set_up)
 
-    it('basic functionality: valid login ok, invalid login fails', function (done) {
-        const plugin = this.plugin;
-        const user = this.user;
-        const connection = this.connection;
-        plugin._init_ldappool(function next () {
-            connection.server.notes.ldappool.config.authn = {  };
-            plugin.check_plain_passwd(connection, user.uid, user.password, function (result) {
+    it('basic functionality: valid login ok', function (done) {
+        this.plugin._init_ldappool(() => {
+            this.connection.server.notes.ldappool.config.authn = {  };
+            this.plugin.check_plain_passwd(this.connection, this.user.uid, this.user.password, (result) => {
                 assert.equal(true, result);
-                plugin.check_plain_passwd(connection, user.uid, 'invalid', function (result2) {
-                    assert.equal(false, result2);
-                    done();
-                })
+                done();
+            })
+        }, this.server);
+    })
+
+    it('basic functionality: invalid login fails', function (done) {
+        this.plugin._init_ldappool(() => {
+            this.connection.server.notes.ldappool.config.authn = {  };
+            this.plugin.check_plain_passwd(this.connection, this.user.uid, 'invalid', (result2) => {
+                assert.equal(false, result2);
+                done();
             })
         }, this.server);
     })
@@ -160,16 +164,16 @@ describe('aliases', function () {
 
     it('basic functionality: resolve forwarding user', function (done) {
         const connection = this.connection;
-        connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
+        connection.transaction = { rcpt_to : [ 'forwarder@example.com' ] };
         connection.server.notes.ldappool.config.aliases = {  };
         connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
         connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         this.plugin.aliases(function (result) {
             assert.equal(undefined, result);
-            assert.equal('<user2@my-domain.com>', connection.transaction.rcpt_to.toString());
+            assert.equal('<user2@example.com>', connection.transaction.rcpt_to.toString());
             done();
         }, connection, [ { address : () => {
-            return 'forwarder@my-domain.com';
+            return 'forwarder@example.com';
         }}]);
     })
 
@@ -193,7 +197,7 @@ describe('check_rcpt', function () {
             assert.equal(constants.ok, err);
             done();
         }, this.connection, [{
-            address : () => { return 'user1@my-domain.com'; }
+            address : () => { return 'user1@example.com'; }
         }]);
     })
 
@@ -217,7 +221,7 @@ describe('check_authz', function () {
         this.plugin.check_authz(function (err) {
             assert.ifError(err);
             done();
-        }, this.connection, [new Address('<user1@my-domain.com>')]);
+        }, this.connection, [new Address('<user1@example.com>')]);
     })
 
     it('next if ldappool.config.authz is not set', function (done) {
@@ -256,9 +260,9 @@ describe('_load_ldap_ini', function () {
     it('check if values get loaded and set', function (done) {
         this.plugin._init_ldappool(() => {
             this.plugin._load_ldap_ini();
-            assert.equal('uid=user1,ou=users,dc=my-domain,dc=com', this.server.notes.ldappool.config.binddn);
+            assert.equal('uid=user1,ou=users,dc=example,dc=com', this.server.notes.ldappool.config.binddn);
             assert.equal('ykaHsOzEZD', this.server.notes.ldappool.config.bindpw);
-            assert.equal('my-domain.com', this.server.notes.ldappool.config.basedn);
+            assert.equal('example.com', this.server.notes.ldappool.config.basedn);
             assert.equal('base', this.server.notes.ldappool.config.scope);
         }, this.server);
         done();
@@ -269,9 +273,9 @@ describe('_load_ldap_ini', function () {
         assert.equal(undefined, plugin._tmp_pool_config);
         plugin._load_ldap_ini();
         const conf = plugin._tmp_pool_config.main;
-        assert.equal('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
+        assert.equal('uid=user1,ou=users,dc=example,dc=com', conf.binddn);
         assert.equal('ykaHsOzEZD', conf.bindpw);
-        assert.equal('my-domain.com', conf.basedn);
+        assert.equal('example.com', conf.basedn);
         assert.equal('base', conf.scope);
         done();
     })
@@ -293,9 +297,9 @@ describe('_init_ldappool', function () {
         this.plugin._load_ldap_ini();
         this.plugin._init_ldappool(() => {
             const conf = this.plugin._pool.config;
-            assert.equal('uid=user1,ou=users,dc=my-domain,dc=com', conf.binddn);
+            assert.equal('uid=user1,ou=users,dc=example,dc=com', conf.binddn);
             assert.equal('ykaHsOzEZD', conf.bindpw);
-            assert.equal('my-domain.com', conf.basedn);
+            assert.equal('example.com', conf.basedn);
             done();
         }, this.server);
     })
@@ -303,14 +307,15 @@ describe('_init_ldappool', function () {
 
 describe('shutdown', function () {
     beforeEach(_set_up)
+
     it('make sure ldappool gets closed', function (done) {
         this.plugin._init_ldappool(() => {
             this.server.notes.ldappool.get((err, client) => {
-                this.plugin.shutdown(function () {
+                this.plugin.shutdown(() => {
                     assert.equal(true, client.unbound);
                     done();
-                });
-            });
+                })
+            })
         }, this.server);
     })
 })

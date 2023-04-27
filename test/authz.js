@@ -10,9 +10,9 @@ const ldappool  = require('../pool');
 function _set_up (done) {
     this.user = {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     };
     this.plugin = require('../authz');
     this.connection = fixtures.connection.createConnection();
@@ -23,7 +23,7 @@ function _set_up (done) {
                     server : [ 'ldap://localhost:3389' ],
                     binddn : this.user.dn,
                     bindpw : this.user.password,
-                    basedn : 'dc=my-domain,dc=com'
+                    basedn : 'dc=example,dc=com'
                 }
             })
         }
@@ -69,7 +69,7 @@ describe('_verify_address', function () {
         const pool = this.connection.server.notes.ldappool;
         pool.config.authz.searchfilter =  '(&(objectclass=*)(|(uid=%u';
         this.plugin._verify_address(user.uid, user.mail, function (err, result) {
-            assert.equal('Error: (|(uid=user has unbalanced parentheses', err.toString());
+            assert.equal('unbalanced parens', err.message);
             assert.equal(false, result);
             done();
         }, this.connection);
@@ -123,7 +123,7 @@ describe('check_authz', function () {
         this.plugin.check_authz(function (err) {
             assert.equal(undefined, err);
             done();
-        }, this.connection, [new Address('<user1@my-domain.com>')]);
+        }, this.connection, [new Address('<user1@example.com>')]);
     })
 
     it('deny if not authorized', function (done) {
@@ -132,7 +132,7 @@ describe('check_authz', function () {
         plugin.check_authz(function (err) {
             assert.equal(constants.deny, err);
             done();
-        }, this.connection, [new Address('user2@my-domain.com')]);
+        }, this.connection, [new Address('user2@example.com')]);
     })
 
     it('denysoft on error', function (done) {
@@ -141,14 +141,14 @@ describe('check_authz', function () {
         this.plugin.check_authz(function (err) {
             assert.equal(constants.denysoft, err);
             done();
-        }, this.connection, [new Address('user1@my-domain.com')]);
+        }, this.connection, [new Address('user1@example.com')]);
     })
 
     it('ignore invalid params: missing auth_user', function (done) {
         this.plugin.check_authz(function (err) {
             assert.ifError(err);
             done();
-        }, this.connection, [new Address('user1@my-domain.com')]);
+        }, this.connection, [new Address('user1@example.com')]);
     })
 
     it('ignore invalid params: missing address', function (done) {

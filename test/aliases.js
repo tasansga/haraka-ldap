@@ -10,17 +10,17 @@ const ldappool  = require('../pool');
 function _set_up (done) {
     this.user = {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     };
     this.group = {
-        dn : 'cn=postmaster,dc=my-domain,dc=com',
-        mail : 'postmaster@my-domain.com',
+        dn : 'cn=postmaster,dc=example,dc=com',
+        mail : 'postmaster@example.com',
         member : [
-            'uid=user1,ou=users,dc=my-domain,dc=com',
-            'uid=user2,ou=people,dc=my-domain,dc=com',
-            'uid=nonunique,ou=users,dc=my-domain,dc=com'
+            'uid=user1,ou=users,dc=example,dc=com',
+            'uid=user2,ou=people,dc=example,dc=com',
+            'uid=nonunique,ou=users,dc=example,dc=com'
         ]
     };
     this.plugin = require('../aliases');
@@ -33,7 +33,7 @@ function _set_up (done) {
                     server : [ 'ldap://localhost:3389' ],
                     binddn : this.user.dn,
                     bindpw : this.user.password,
-                    basedn : 'dc=my-domain,dc=com'
+                    basedn : 'dc=example,dc=com'
                 }
             })
         }
@@ -52,12 +52,13 @@ describe('_get_alias', function () {
 
     it('ok with test group', function (done) {
         this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
-        this.plugin._get_alias(this.group.mail, function (err, result) {
+        this.plugin._get_alias(this.group.mail, (err, result) => {
             assert.ifError(err);
-            result.sort();
-            assert.equal('nonunique1@my-domain.com', result[0]);
-            assert.equal('user1@my-domain.com', result[1]);
-            assert.equal('user2@my-domain.com', result[2]);
+            assert.deepStrictEqual([
+                'nonunique1@example.com',
+                'user1@example.com',
+                'user2@example.com'
+            ], result.sort())
             done();
         }, this.connection);
     })
@@ -65,16 +66,16 @@ describe('_get_alias', function () {
     it('ok with forwarding user', function (done) {
         this.connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
         this.connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
-        this.plugin._get_alias('forwarder@my-domain.com', function (err, result) {
-            assert.equal('user2@my-domain.com', result[0]);
+        this.plugin._get_alias('forwarder@example.com', function (err, result) {
+            assert.equal('user2@example.com', result[0]);
             done();
         }, this.connection);
     })
 
     it('ok with resolve-by-dn', function (done) {
         this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
-        this.plugin._get_alias('postmaster@my-domain.com', function (err, result) {
-            const expected = [ 'user1@my-domain.com', 'user2@my-domain.com', 'nonunique1@my-domain.com' ];
+        this.plugin._get_alias('postmaster@example.com', function (err, result) {
+            const expected = [ 'user1@example.com', 'user2@example.com', 'nonunique1@example.com' ];
             expected.sort();
             result.sort();
             assert.equal(util.inspect(expected), util.inspect(result));
@@ -134,9 +135,9 @@ describe('_resolve_dn_to_alias', function () {
     it('ok multiple', function (done) {
         this.plugin._resolve_dn_to_alias(this.group.member, function (err, result) {
             result.sort();
-            assert.equal('nonunique1@my-domain.com', result[0]);
-            assert.equal('user1@my-domain.com', result[1]);
-            assert.equal('user2@my-domain.com', result[2]);
+            assert.equal('nonunique1@example.com', result[0]);
+            assert.equal('user1@example.com', result[1]);
+            assert.equal('user2@example.com', result[2]);
             done();
         }, this.connection);
     })
@@ -199,9 +200,9 @@ describe('aliases', function () {
         connection.transaction = { rcpt_to : [ group.mail ] };
         this.connection.server.notes.ldappool.config.aliases.attribute_is_dn = true;
         const expected = [
-            '<user1@my-domain.com>',
-            '<user2@my-domain.com>',
-            '<nonunique1@my-domain.com>'
+            '<user1@example.com>',
+            '<user2@example.com>',
+            '<nonunique1@example.com>'
         ];
         expected.sort();
         function next (result) {
@@ -231,16 +232,16 @@ describe('aliases', function () {
     it('resolve forwarding user', function (done) {
         const plugin = this.plugin;
         const connection = this.connection;
-        connection.transaction = { rcpt_to : [ 'forwarder@my-domain.com' ] };
+        connection.transaction = { rcpt_to : [ 'forwarder@example.com' ] };
         connection.server.notes.ldappool.config.aliases.searchfilter = '(&(objectclass=*)(mailLocalAddress=%a))';
         connection.server.notes.ldappool.config.aliases.attribute = 'mailRoutingAddress';
         function next (result) {
             assert.equal(undefined, result);
-            assert.equal('<user2@my-domain.com>', connection.transaction.rcpt_to.toString());
+            assert.equal('<user2@example.com>', connection.transaction.rcpt_to.toString());
             done();
         }
         plugin.aliases(next, connection, [ { address : () => {
-            return 'forwarder@my-domain.com';
+            return 'forwarder@example.com';
         }}]);
     })
 })

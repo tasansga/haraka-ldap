@@ -74,7 +74,7 @@ It's possible to override the default scope
 * `searchfilter`: *optional*, default: (&(objectclass=*)(uid=%u))
 Search filter to lookup the user's DN. The param `%u` denotes the uid/username as given during login. As result the search filter should return the object(s) to be used for a simple bind attempt. Authentication will fail if the search filter doesn't return exactly one matching object.
 * `dn`: *optional*, default: undefined
-`dn` is an array of template DN to check for the given uid. This is an alternate mode of lookup, where the plugin inserts the uid in the DN template and immediately tries to bind instead of doing a search for the DN first. A template DN looks like `uid=%u,ou=users,dc=my-domain,dc=com`. The param `%u` denotes the uid/username as given during login.
+`dn` is an array of template DN to check for the given uid. This is an alternate mode of lookup, where the plugin inserts the uid in the DN template and immediately tries to bind instead of doing a search for the DN first. A template DN looks like `uid=%u,ou=users,dc=example,dc=com`. The param `%u` denotes the uid/username as given during login.
 
 
 ### \[authz\]
@@ -116,15 +116,15 @@ Given the following configuration:
 searchfilter = (&(objectclass=*)(uid=%u))
 ```
 
-Here the plugin will search for the object(s) first. The search filter should return some object's DN like `uid=user1,ou=users,dc=my-domain,dc=com`. Then the plugin will attempt a simple bind with the found DN and the given password.
+Here the plugin will search for the object(s) first. The search filter should return some object's DN like `uid=user1,ou=users,dc=example,dc=com`. Then the plugin will attempt a simple bind with the found DN and the given password.
 
 
 #### By DN templates
 Given the following configuration:
 
 ```
-dn[] = uid=%u,ou=users,dc=my-domain,dc=com
-dn[] = uid=%u,ou=people,dc=my-domain,dc=com
+dn[] = uid=%u,ou=users,dc=example,dc=com
+dn[] = uid=%u,ou=people,dc=example,dc=com
 ```
 
 The plugin will replace `%u` with the given username and immediately attempts to simple bind with the resulting DN(s) and the given password.
@@ -137,10 +137,10 @@ While the search filter approach offers more flexibility, a limited number of DN
 However, there's also another noteworthy difference. Given the following LDAP data:
 
 ```
-dn: uid=nonunique,ou=users,dc=my-domain,dc=com
+dn: uid=nonunique,ou=users,dc=example,dc=com
 uid: nonunique
 
-dn: uid=nonunique,ou=people,dc=my-domain,dc=com
+dn: uid=nonunique,ou=people,dc=example,dc=com
 uid: nonunique
 ```
 
@@ -154,45 +154,45 @@ Following are a few examples to explain the proper usage of aliases.
 It is possible to use email aliases to deliver email for one address to another address. Given the following LDAP objects:
 
 ```
-dn: uid=forwarder,ou=people,dc=my-domain,dc=com
+dn: uid=forwarder,ou=people,dc=example,dc=com
 objectClass: inetLocalMailRecipient
 uid: forwarder
 cn: Forwarding User
-mailLocalAddress: forwarder@my-domain.com
-mailRoutingAddress: user@my-domain.com
+mailLocalAddress: forwarder@example.com
+mailRoutingAddress: user@example.com
 
-dn: uid=user,dc=my-domain,dc=com
+dn: uid=user,dc=example,dc=com
 uid: user
 cn: Our User
-mailLocalAddress: user@my-domain.com
+mailLocalAddress: user@example.com
 ```
 
-So here are two users in LDAP, both with a `mailLocalAddress` and one with a `mailRoutingAddress`. Email send to the user with a `mailRoutingAddress` should be delivered to `user@my-domain.com`. This can be accomplished with the following configuration:
+So here are two users in LDAP, both with a `mailLocalAddress` and one with a `mailRoutingAddress`. Email send to the user with a `mailRoutingAddress` should be delivered to `user@example.com`. This can be accomplished with the following configuration:
 
 ```
 searchfilter = (&(mailLocalAddress=%a)(mailRoutingAddress=*))
 attribute = mailRoutingAddress
 ```
 
-Given this configuration, the haraka-plugin-ldap-aliases plugin will simply change recipients that match the given searchfilter to the value referenced by the `mailRoutingAddress` attribute: Mail send to `forwarder@my-domain.com` will be delivered to `user@my-domain.com`.
+Given this configuration, the haraka-plugin-ldap-aliases plugin will simply change recipients that match the given searchfilter to the value referenced by the `mailRoutingAddress` attribute: Mail send to `forwarder@example.com` will be delivered to `user@example.com`.
 
 
 #### attribute_is_dn
 attribute_is_dn is handy to use LDAP groups as mail groups. Let's check the following LDAP group and user:
 
 ```
-dn: cn=postmaster,dc=my-domain,dc=com
+dn: cn=postmaster,dc=example,dc=com
 objectclass: groupOfNames
-mailLocalAddress: postmaster@my-domain.com
-member: uid=user,dc=my-domain,dc=com
+mailLocalAddress: postmaster@example.com
+member: uid=user,dc=example,dc=com
 
-dn: uid=user,dc=my-domain,dc=com
+dn: uid=user,dc=example,dc=com
 uid: user
 cn: Our User
-mailLocalAddress: user@my-domain.com
+mailLocalAddress: user@example.com
 ```
 
-So, we have one group with the email address `postmaster@my-domain.com` and one user with the email address `user@my-domain.com`. Also, the user is a member of the group.
+So, we have one group with the email address `postmaster@example.com` and one user with the email address `user@example.com`. Also, the user is a member of the group.
 
 To use the LDAP group as email group the haraka-plugin-ldap-aliases plugin would need the following configuration settings:
 
@@ -203,7 +203,7 @@ attribute_is_dn = true
 subattribute = mailLocalAddress
 ```
 
-The search filter applies only to groups (`objectclass=groupOfNames`) with an email address of the alias email (`mailLocalAddress=%a`). Then the plugin checks the group's attribute `member` and assumes it contains a DN (`attribute_is_dn = true`) and looks up and returns every member DN's attribute `mailLocalAddress`. In other words, email to `postmaster@my-domain.com` would be send to `user@my-domain.com`. Of course a group may contain multiple members, in which case every member with a valid `mailLocalAddress` would receive the email.
+The search filter applies only to groups (`objectclass=groupOfNames`) with an email address of the alias email (`mailLocalAddress=%a`). Then the plugin checks the group's attribute `member` and assumes it contains a DN (`attribute_is_dn = true`) and looks up and returns every member DN's attribute `mailLocalAddress`. In other words, email to `postmaster@example.com` would be send to `user@example.com`. Of course a group may contain multiple members, in which case every member with a valid `mailLocalAddress` would receive the email.
 
 
 [ci-img]: https://travis-ci.org/haraka/haraka-plugin-ldap.svg

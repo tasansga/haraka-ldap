@@ -9,9 +9,9 @@ const ldappool     = require('../pool');
 function _set_up (done) {
     this.user = {
         uid : 'user1',
-        dn : 'uid=user1,ou=users,dc=my-domain,dc=com',
+        dn : 'uid=user1,ou=users,dc=example,dc=com',
         password : 'ykaHsOzEZD',
-        mail : 'user1@my-domain.com'
+        mail : 'user1@example.com'
     };
     this.plugin = require('../rcpt_to');
     this.connection = fixtures.connection.createConnection();
@@ -23,7 +23,7 @@ function _set_up (done) {
                     server : [ 'ldap://localhost:3389' ],
                     binddn : this.user.dn,
                     bindpw : this.user.password,
-                    basedn : 'dc=my-domain,dc=com'
+                    basedn : 'dc=example,dc=com'
                 }
             })
         }
@@ -55,7 +55,7 @@ describe('_verify_existence', function () {
     it('invalid search filter', function (done) {
         this.connection.server.notes.ldappool.config.rcpt_to.searchfilter =  '(&(objectclass=*)(|(mail=%a';
         this.plugin._verify_existence(this.user.mail, function (err, result) {
-            assert.equal('Error: (|(mail=user1@my-domain.co has unbalanced parentheses', err.toString());
+            assert.equal('unbalanced parens', err.message);
             assert.equal(false, result);
             done();
         }, this.connection);
@@ -107,7 +107,7 @@ describe('check_rcpt', function () {
             assert.equal(constants.ok, err);
             done();
         }, this.connection, [{
-            address : () => { return 'user1@my-domain.com'; }
+            address : () => { return 'user1@example.com'; }
         }]);
     })
 
@@ -117,7 +117,7 @@ describe('check_rcpt', function () {
             assert.equal(constants.denysoft, err);
             done();
         }, this.connection, [{
-            address : () => { return 'user1@my-domain.com'; }
+            address : () => { return 'user1@example.com'; }
         }]);
     })
 

@@ -1,20 +1,20 @@
 # add base dn
-dn: dc=my-domain,dc=com
+dn: dc=example,dc=com
 changetype: add
 objectclass: top
 objectclass: organization
 objectClass: dcObject
-dc: my-domain
-o: my-domain.com
+dc: example
+o: example.com
 
 # add 2 dn for people
-dn: ou=users,dc=my-domain,dc=com
+dn: ou=users,dc=example,dc=com
 changetype: add
 objectclass: top
 objectclass: organizationalUnit
 ou: users
 
-dn: ou=people,dc=my-domain,dc=com
+dn: ou=people,dc=example,dc=com
 changetype: add
 objectclass: top
 objectclass: organizationalUnit
@@ -22,7 +22,7 @@ ou: people
 
 # add user1 in 1st dn
 # password is: ykaHsOzEZD
-dn: uid=user1,ou=users,dc=my-domain,dc=com
+dn: uid=user1,ou=users,dc=example,dc=com
 changetype: add
 objectClass: top
 objectClass: uidObject
@@ -31,12 +31,12 @@ objectClass: simpleSecurityObject
 objectClass: inetLocalMailRecipient
 uid: user1
 cn: Test User 1
-mailLocalAddress: user1@my-domain.com
+mailLocalAddress: user1@example.com
 userPassword: {SSHA}ul8jaq76hmLRuvheYxSqPDCQrPxldRkl
 
 # add user2 in 2nd dn
 # password is: KQD9zs,LGv
-dn: uid=user2,ou=people,dc=my-domain,dc=com
+dn: uid=user2,ou=people,dc=example,dc=com
 changetype: add
 objectClass: top
 objectClass: uidObject
@@ -45,12 +45,12 @@ objectClass: simpleSecurityObject
 objectClass: inetLocalMailRecipient
 uid: user2
 cn: Test User 2
-mailLocalAddress: user2@my-domain.com
+mailLocalAddress: user2@example.com
 userPassword: {SSHA}j999dNJUvKzt480ky0/A5VvNRqzSS1TA
 
 # add nonunique in both dn
 # password is: CZVm3,BLlx
-dn: uid=nonunique,ou=users,dc=my-domain,dc=com
+dn: uid=nonunique,ou=users,dc=example,dc=com
 changetype: add
 objectClass: top
 objectClass: uidObject
@@ -59,11 +59,11 @@ objectClass: simpleSecurityObject
 objectClass: inetLocalMailRecipient
 uid: nonunique
 cn: Nonunique Test User 1
-mailLocalAddress: nonunique1@my-domain.com
+mailLocalAddress: nonunique1@example.com
 userPassword: {SSHA}/zz+SrbdIhlwQ6ypFP2bupP6IUKzgA2z
 
 # password is: LsBHDGorAh
-dn: uid=nonunique,ou=people,dc=my-domain,dc=com
+dn: uid=nonunique,ou=people,dc=example,dc=com
 changetype: add
 objectClass: top
 objectClass: uidObject
@@ -72,12 +72,12 @@ objectClass: simpleSecurityObject
 objectClass: inetLocalMailRecipient
 uid: nonunique
 cn: Nonunique Test User 2
-mailLocalAddress: nonunique2@my-domain.com
+mailLocalAddress: nonunique2@example.com
 userPassword: {SSHA}gLTxl9QpE1dHNgfZK9d3Ne8MKXtFRRfn
 
 # add user who forwards mail
 # password is: 1QRSrUECyKLR
-dn: uid=forwarder,ou=people,dc=my-domain,dc=com
+dn: uid=forwarder,ou=people,dc=example,dc=com
 changetype: add
 objectClass: top
 objectClass: uidObject
@@ -86,19 +86,19 @@ objectClass: simpleSecurityObject
 objectClass: inetLocalMailRecipient
 uid: forwarder
 cn: Forwarding Test User
-mailLocalAddress: forwarder@my-domain.com
-mailRoutingAddress: user2@my-domain.com
+mailLocalAddress: forwarder@example.com
+mailRoutingAddress: user2@example.com
 userPassword: {SSHA}h53i1Xy3/Hi27rr+krH/TwSGkEohfbxH
 
 # add group to resolve by-dn
-dn: cn=postmaster,dc=my-domain,dc=com
+dn: cn=postmaster,dc=example,dc=com
 changetype: add
 objectclass: top
 objectclass: groupOfNames
 objectClass: inetLocalMailRecipient
-mailLocalAddress: postmaster@my-domain.com
-member: uid=user1,ou=users,dc=my-domain,dc=com
-member: uid=user2,ou=people,dc=my-domain,dc=com
-member: uid=nonunique,ou=users,dc=my-domain,dc=com
+mailLocalAddress: postmaster@example.com
+member: uid=user1,ou=users,dc=example,dc=com
+member: uid=user2,ou=people,dc=example,dc=com
+member: uid=nonunique,ou=users,dc=example,dc=com
 member: uid=unknown,dc=wherever,dc=com
 
