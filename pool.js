@@ -46,8 +46,7 @@ LdapPool.prototype._create_client = function (next) {
 
     if (!this.config.tls_enabled) return next(null, client);
 
-    console.log(`starting TLS`)
-    client.starttls({ }, null, function (err) {
+    client.starttls({ }, function (err) {
         if (err) return next(err);
         next(null, client);
     });
@@ -57,8 +56,9 @@ LdapPool.prototype.close = function (next) {
     if (this.pool.servers.length <= 0) return next();
 
     while (this.pool.servers.length > 0) {
-        this.pool.servers.shift().unbind();
-        if (this.pool.servers.length === 0) next()
+        this.pool.servers.shift().unbind(() => {
+            if (this.pool.servers.length === 0) next()
+	});
     }
 }
 
