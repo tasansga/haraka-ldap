@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if ! dpkg -l | grep -q slapd; then
-    sudo apt install --no-install-recommends -y gcc gettext make g++ apparmor-utils slapd ldapscripts
+    sudo apt install --no-install-recommends -y gcc gettext make g++ apparmor-utils slapd ldap-utils ldapscripts
     sudo service slapd stop
     sudo systemctl disable slapd.service
 fi
