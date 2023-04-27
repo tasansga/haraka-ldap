@@ -10,6 +10,7 @@ const testUser = {
     password : 'ykaHsOzEZD',
     mail : 'user1@example.com'
 };
+Object.freeze(testUser)
 
 const testCfg = {
     main : {
@@ -19,16 +20,17 @@ const testCfg = {
         basedn : 'dc=example,dc=com'
     }
 };
+Object.freeze(testCfg)
 
 function _set_up () {
     this.user = testUser;
     this.cfg = testCfg;
 }
 
-describe('_set_config', function () {
+describe('_set_config', () => {
     beforeEach(_set_up);
 
-    it('defaults', function (done) {
+    it('defaults', (done) => {
         const pool = new ldappool.LdapPool(testCfg);
         const config = pool._set_config();
         assert.equal(pool._set_config().toString(), pool._set_config({}).toString());
@@ -43,11 +45,11 @@ describe('_set_config', function () {
         done()
     })
 
-    it('userdef', function () {
+    it('userdef', () => {
         const pool = new ldappool.LdapPool(testCfg);
         const cfg = { main : {
             server : 'testserver',
-            timeout : 10000,
+            timeout : 10_000,
             tls_enabled : true,
             tls_rejectUnauthorized : true,
             scope : 'one',
@@ -154,7 +156,7 @@ describe('_bind_default', function () {
         });
     })
 
-    it('bind with no binddn / bindpw', function (done) {
+    it('bind with no binddn / bindpw', (done) => {
         const cfg = JSON.parse(JSON.stringify(testCfg))
         cfg.main.binddn = undefined;
         cfg.main.bindpw = undefined;
@@ -166,7 +168,7 @@ describe('_bind_default', function () {
         })
     })
 
-    it('bind with invalid binddn / bindpw', function (done) {
+    it('bind with invalid binddn / bindpw', (done) => {
         const cfg = JSON.parse(JSON.stringify(testCfg))
         cfg.main.binddn = 'invalid';
         cfg.main.bindpw = 'invalid';
@@ -178,26 +180,28 @@ describe('_bind_default', function () {
     })
 })
 
-describe('get', function () {
+describe('get', () => {
     beforeEach(_set_up);
 
-    it('test connection validity and pooling', function (done) {
+    it('test connection validity and pooling', (done) => {
         const pool = new ldappool.LdapPool(testCfg);
         assert.equal(0, pool.pool.servers.length);
-        pool.get(function (err, client) {
+        pool.get((err, client) => {
             assert.equal(null, err);
             assert.equal(1, pool.pool.servers.length);
-            assert.equal('ldap://localhost:3389', client.url.href);
-            pool.get(function (err2, client2) {
+            assert.equal('ldap://localhost:3389', client?.url?.href);
+            pool.get((err2, client2) => {
                 assert.equal(null, err2);
                 assert.equal(2, pool.pool.servers.length);
-                assert.equal('ldaps://localhost:3636', client2.url.href);
-                pool.get(function (err3, client3) {
+                assert.equal('ldaps://localhost:3636', client2?.url?.href);
+                pool.get((err3, client3) => {
                     assert.equal(2, pool.pool.servers.length);
-                    assert.equal('ldap://localhost:3389', client3.url.href);
+                    assert.equal('ldap://localhost:3389', client3?.url?.href);
                     done();
                 })
             })
         })
     })
+
+    after(_set_up)
 })

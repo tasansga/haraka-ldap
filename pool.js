@@ -5,7 +5,7 @@ const ldap = require('ldapjs');
 const LdapPool = function (config) {
     this._set_config(config);
     this.pool = { 'servers' : [] };
-};
+}
 
 LdapPool.prototype._set_config = function (config) {
     if (config === undefined) config = {};
@@ -46,7 +46,7 @@ LdapPool.prototype._create_client = function (next) {
 
     if (!this.config.tls_enabled) return next(null, client);
 
-    client.starttls({ }, function (err) {
+    client.starttls({ }, null, function (err) {
         if (err) return next(err);
         next(null, client);
     });
@@ -65,18 +65,18 @@ LdapPool.prototype.close = function (next) {
 LdapPool.prototype._bind_default = function (next) {
     const cfg = this.config;
 
-    if (cfg.binddn !== undefined && cfg.bindpw !== undefined) {
-        this._create_client( (err, client) => {
-            if (err) return next(err);
+    this._create_client((err, client) => {
+        if (err) return next(err)
 
-            client.bind(cfg.binddn, cfg.bindpw, function (err2) {
+        if (cfg.binddn && cfg.bindpw) {
+            client.bind(cfg.binddn, cfg.bindpw, (err2) => {
                 next(err2, client);
-            });
-        });
-    }
-    else {
-        return this._create_client(next);
-    }
+            })
+        }
+        else {
+            next(null, client)
+        }
+    })
 }
 
 LdapPool.prototype.get = function (next) {
@@ -92,7 +92,7 @@ LdapPool.prototype.get = function (next) {
     this._bind_default( (err, client) => {
         pool.servers.push(client);
         next(err, client);
-    });
+    })
 }
 
 exports.LdapPool = LdapPool;
