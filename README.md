@@ -206,8 +206,8 @@ subattribute = mailLocalAddress
 The search filter applies only to groups (`objectclass=groupOfNames`) with an email address of the alias email (`mailLocalAddress=%a`). Then the plugin checks the group's attribute `member` and assumes it contains a DN (`attribute_is_dn = true`) and looks up and returns every member DN's attribute `mailLocalAddress`. In other words, email to `postmaster@example.com` would be send to `user@example.com`. Of course a group may contain multiple members, in which case every member with a valid `mailLocalAddress` would receive the email.
 
 
-[ci-img]: https://travis-ci.org/haraka/haraka-plugin-ldap.svg
-[ci-url]: https://travis-ci.org/haraka/haraka-plugin-ldap
+[ci-img]: https://github.com/haraka/haraka-plugin-ldap/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/haraka/haraka-plugin-ldap/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-ldap/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-ldap
 [npm-img]: https://nodei.co/npm/haraka-plugin-ldap.png
