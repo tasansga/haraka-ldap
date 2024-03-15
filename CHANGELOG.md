@@ -1,5 +1,10 @@
 ### Unreleased
 
+#### 1.1.1 - 2024-03-15
+
+- config: comment out default server entries, fixes #9
+- doc(README): update doc badge URL #8
+- test: use 127.0.0.1 vs localhost to avoid IPv6 failure
 
 #### 1.1.0 - 2023-04-26
 
